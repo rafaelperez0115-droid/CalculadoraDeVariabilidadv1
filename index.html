@@ -484,7 +484,7 @@
     <div class="login-card">
         <h1>C&S Industries</h1>
         <p class="login-sub" id="txt-login-sub">Calculadora de Variabilidad — Inicio de Sesión</p>
-        <input type="text" id="loginUser" placeholder="Usuario" autocomplete="username" onkeydown="if(event.key==='Enter')iniciarSesion()">
+        <input type="text" id="loginUser" placeholder="Usuario (ej: InspectorQC)" autocomplete="username" onkeydown="if(event.key==='Enter')iniciarSesion()">
         <input type="password" id="loginPass" placeholder="Contraseña" autocomplete="current-password" onkeydown="if(event.key==='Enter')iniciarSesion()">
         <button id="btnLogin" onclick="iniciarSesion()">Entrar</button>
         <div class="login-error" id="loginError"></div>
@@ -1009,7 +1009,8 @@ function emailARol(email) {
 }
 
 function iniciarSesion() {
-    const usuario = document.getElementById('loginUser').value.trim();
+    // Tolerante: si escriben el correo completo, tomamos solo el usuario
+    const usuario = document.getElementById('loginUser').value.trim().split('@')[0];
     const pass = document.getElementById('loginPass').value;
     const errEl = document.getElementById('loginError');
     errEl.innerText = '';
