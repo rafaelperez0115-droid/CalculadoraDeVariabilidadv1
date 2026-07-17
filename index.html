@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C&S Industries - Calculadora de Variabilidad</title>
+
+    <!-- PWA -->
+    <meta name="description" content="Calculadora de Muestreo Aleatorio Variable MIL-STD-105E">
+    <meta name="theme-color" content="#003366">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="C&S Variabilidad">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
+    <style>
+        /* ── Variables de tema ── */
+        :root {
+            --bg: #f0f2f5;
+            --card: #ffffff;
+            --text: #333333;
+            --text-sub: #555555;
+            --text-muted: #666666;
+            --border: #cccccc;
+            --brand: #003366;
+            --brand-hover: #00509e;
+            --summary-bg: #eef6ff;
+            --aql-bg: #fff8e1;
+            --aql-border: #ffc107;
+            --aql-text: #795548;
+            --th-bg: #f8f9fa;
+            --footer-bg: #f1f1f1;
+            --input-bg: #ffffff;
+            --shadow: 0 10px 25px rgba(0,0,0,0.1);
+            --modal-bg: rgba(0,0,0,0.45);
+            --settings-bg: #ffffff;
+            --settings-border: #e0e0e0;
+            --toggle-off: #ccc;
+        }
+        [data-theme="dark"] {
+            --bg: #0f1117;
+            --card: #1c1f2b;
+            --text: #e8eaf0;
+            --text-sub: #aab0c0;
+            --text-muted: #8891a5;
+            --border: #3a3f52;
+            --brand: #4d9de0;
+            --brand-hover: #6ab4f5;
+            --summary-bg: #1a2540;
+            --aql-bg: #2a2010;
+            --aql-border: #b8860b;
+            --aql-text: #d4a843;
+            --th-bg: #252a3a;
+            --footer-bg: #252a3a;
+            --input-bg: #252a3a;
+            --shadow: 0 10px 25px rgba(0,0,0,0.4);
+            --modal-bg: rgba(0,0,0,0.7);
+            --settings-bg: #1c1f2b;
+            --settings-border: #3a3f52;
+            --toggle-off: #555;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg);
+            padding: 20px;
+            color: var(--text);
+            transition: background-color 0.3s, color 0.3s;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: var(--card);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            max-width: 650px;
+            margin: auto;
+            border-top: 8px solid var(--brand);
+            transition: background 0.3s, box-shadow 0.3s;
+        }
+
+        /* ── Header ── */
+        .header-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+        h1 {
+            color: var(--brand);
+            font-size: 24px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+        }
+        .subtitle { color: var(--brand); font-size: 16px; margin-bottom: 5px; font-weight: bold; }
+        .tech-subtitle {
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+            font-style: italic;
+        }
+
+        /* ── Botón settings ── */
+        .btn-settings {
+            background: none;
+            border: none;
+            padding: 4px;
+            cursor: pointer;
+            font-size: 20px;
+            color: var(--text-muted);
+            transition: color 0.2s, transform 0.3s;
+            flex-shrink: 0;
+            margin: 0;
+            line-height: 1;
+            opacity: 0.7;
+        }
+        .btn-settings:hover { color: var(--brand); opacity: 1; transform: rotate(30deg); }
+        .btn-settings:focus, .btn-settings:focus-visible { outline: none; box-shadow: none; }
+        .btn-settings:active { background: none; }
+        .btn-settings { -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; user-select: none; }
+
+        /* ── Modal de configuración ── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: var(--modal-bg);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .modal {
+            background: var(--settings-bg);
+            border: 1px solid var(--settings-border);
+            border-radius: 14px;
+            padding: 28px 24px;
+            width: 100%;
+            max-width: 340px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            animation: slideUp 0.25s ease;
+        }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 22px;
+        }
+        .modal-header h2 { font-size: 17px; color: var(--text); }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 2px 6px;
+            margin: 0;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        .modal-close:hover { background: var(--footer-bg); }
+
+        .setting-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--settings-border);
+        }
+        .setting-row:last-child { border-bottom: none; padding-bottom: 0; }
+        .setting-label { font-size: 14px; color: var(--text); }
+        .setting-desc { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+        /* Toggle switch */
+        .toggle { position: relative; width: 46px; height: 26px; flex-shrink: 0; }
+        .toggle input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider {
+            position: absolute;
+            inset: 0;
+            background: var(--toggle-off);
+            border-radius: 26px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .toggle-slider:before {
+            content: '';
+            position: absolute;
+            width: 20px; height: 20px;
+            left: 3px; bottom: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: 0.3s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        input:checked + .toggle-slider { background: var(--brand); }
+        input:checked + .toggle-slider:before { transform: translateX(20px); }
+
+        /* Selector de idioma */
+        .lang-selector { display: flex; gap: 6px; }
+        .lang-btn {
+            padding: 5px 14px;
+            border-radius: 6px;
+            border: 1.5px solid var(--border);
+            background: none;
+            color: var(--text-sub);
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0;
+            transition: 0.2s;
+        }
+        .lang-btn.active, .lang-btn:hover {
+            border-color: var(--brand);
+            background: var(--summary-bg);
+            color: var(--brand);
+        }
+
+        /* ── Formulario ── */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: left; }
+        .full-width { grid-column: span 2; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 12px; color: var(--text-sub); }
+        input, select {
+            width: 100%; padding: 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            font-size: 14px;
+            background: var(--input-bg);
+            color: var(--text);
+            transition: border-color 0.2s, background 0.3s;
+        }
+        input:focus, select:focus { outline: none; border-color: var(--brand); }
+
+        /* ── Botones acción ── */
+        .button-group { display: flex; gap: 10px; }
+        button {
+            flex: 1; color: white; border: none;
+            padding: 15px; font-size: 15px;
+            border-radius: 6px; cursor: pointer;
+            margin: 20px 0; font-weight: bold; transition: 0.3s;
+        }
+        .btn-generate { background-color: var(--brand); }
+        .btn-generate:hover { background-color: var(--brand-hover); }
+        .btn-print { background-color: #546e7a; display: none; }
+        .btn-print:hover { background-color: #37474f; }
+
+        /* ── Banner instalación ── */
+        #installBanner {
+            display: none;
+            background: linear-gradient(135deg, #003366, #00509e);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            animation: slideDown 0.4s ease;
+        }
+        #installBanner.show { display: flex; }
+        @keyframes slideDown { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
+        #installBanner span { font-size: 13px; flex: 1; }
+        #installBanner strong { display: block; font-size: 15px; }
+        .btn-install {
+            background: white; color: #003366;
+            padding: 8px 16px; border-radius: 6px;
+            font-size: 13px; font-weight: bold;
+            cursor: pointer; white-space: nowrap;
+            margin: 0; flex: 0; border: none;
+        }
+        .btn-dismiss {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.4);
+            color: white; padding: 8px 12px;
+            border-radius: 6px; font-size: 13px;
+            cursor: pointer; margin: 0; flex: 0;
+        }
+
+        /* ── Cajas de resultado ── */
+        .summary-box {
+            background: var(--summary-bg);
+            padding: 15px; border-radius: 8px;
+            margin-top: 15px; display: none;
+            text-align: left;
+            border-left: 5px solid var(--brand);
+            transition: background 0.3s;
+        }
+        .aseguramiento-box {
+            background: var(--aql-bg);
+            padding: 15px; border-radius: 8px;
+            margin-top: 10px;
+            border-left: 5px solid var(--aql-border);
+            font-size: 13px; display: none; text-align: left;
+            transition: background 0.3s;
+        }
+        .porcentaje-badge { float: right; font-size: 22px; font-weight: bold; color: var(--brand); margin-left: 10px; }
+        .aseguramiento-box strong { color: var(--aql-text); font-size: 14px; }
+
+        .status-badge {
+            display: inline-block; padding: 5px 10px;
+            border-radius: 4px; font-size: 12px;
+            font-weight: bold; margin-top: 5px; margin-right: 5px;
+        }
+        .ac-badge { background: #e8f5e9; color: #2e7d32; }
+        .re-badge { background: #ffebee; color: #c62828; }
+
+        /* ── Tabla ── */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; display: none; }
+        th, td { border: 1px solid var(--border); padding: 10px; text-align: center; font-size: 14px; }
+        th { background: var(--th-bg); color: var(--brand); }
+        .total-footer { background: var(--footer-bg); font-weight: bold; }
+
+        .error { color: #d32f2f; font-size: 12px; font-weight: bold; margin-top: 10px; display: none; }
+
+        /* ── Historial / Nube ── */
+        .btn-history { background-color: #00695c; }
+        .btn-history:hover { background-color: #00897b; }
+        .cloud-status {
+            text-align: center; font-size: 12px; font-weight: bold;
+            margin-bottom: 10px; min-height: 16px;
+        }
+        .cloud-status.ok      { color: #2e7d32; }
+        .cloud-status.pending { color: #ef6c00; }
+        .cloud-status.err     { color: #c62828; }
+
+        .modal-wide { max-width: 620px; max-height: 85vh; overflow-y: auto; }
+        .hist-filters { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+        .hist-filters input { font-size: 12px; padding: 8px; }
+        .hist-table { width: 100%; border-collapse: collapse; display: table; margin-top: 5px; }
+        .hist-table th, .hist-table td { border: 1px solid var(--border); padding: 6px; font-size: 11.5px; text-align: center; }
+        .hist-table th { background: var(--th-bg); color: var(--brand); }
+        .hist-empty { text-align: center; font-size: 13px; color: var(--text-muted); padding: 20px 0; }
+        .btn-csv {
+            background: var(--brand); color: white; border: none;
+            padding: 8px 14px; border-radius: 6px; font-size: 12px;
+            font-weight: bold; cursor: pointer; margin: 10px 0 0;
+        }
+        .btn-csv:hover { background: var(--brand-hover); }
+
+        /* ── Offline ── */
+        #offlineIndicator {
+            display: none;
+            background: #ff6f00;
+            color: white; text-align: center;
+            padding: 8px; font-size: 12px;
+            border-radius: 6px; margin-bottom: 10px;
+        }
+
+        /* ── Print ── */
+        @media print {
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; border: none; max-width: 100%; }
+            .form-grid, .button-group, .subtitle, .tech-subtitle,
+            label, input, select, .modal-overlay, #installBanner,
+            #offlineIndicator, .btn-settings, .cloud-status, datalist { display: none !important; }
+            button { display: none !important; }
+            .summary-box, .aseguramiento-box {
+                border: 1px solid #003366;
+                display: block !important; margin-top: 10px;
+            }
+            table { display: table !important; width: 100%; }
+            h1 { font-size: 26px; text-align: center; margin-bottom: 20px; }
+            .print-only { display: block !important; margin-bottom: 20px; text-align: center; font-weight: bold; border-bottom: 2px solid #003366; padding-bottom: 10px; }
+        }
+        .print-only { display: none; }
+    </style>
+</head>
+<body>
+
+<!-- Modal de configuración -->
+<div class="modal-overlay" id="settingsModal" onclick="closeSettingsOnOverlay(event)">
+    <div class="modal">
+        <div class="modal-header">
+            <h2 id="txt-settings-title">⚙️ Configuración</h2>
+            <button class="modal-close" onclick="closeSettings()">✕</button>
+        </div>
+
+        <div class="setting-row">
+            <div>
+                <div class="setting-label" id="txt-dark-label">Tema oscuro</div>
+                <div class="setting-desc" id="txt-dark-desc">Reduce el brillo de pantalla</div>
+            </div>
+            <label class="toggle">
+                <input type="checkbox" id="darkToggle" onchange="applyTheme()">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+
+        <div class="setting-row">
+            <div>
+                <div class="setting-label" id="txt-lang-label">Idioma / Language</div>
+                <div class="setting-desc" id="txt-lang-desc">Español · English</div>
+            </div>
+            <div class="lang-selector">
+                <button class="lang-btn active" id="btn-es" onclick="setLang('es')">ES</button>
+                <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de historial -->
+<div class="modal-overlay" id="historialModal" onclick="if(event.target===this)cerrarHistorial()">
+    <div class="modal modal-wide">
+        <div class="modal-header">
+            <h2 id="txt-hist-title">📋 Historial de Inspecciones</h2>
+            <button class="modal-close" onclick="cerrarHistorial()">✕</button>
+        </div>
+        <div class="hist-filters">
+            <input type="text" id="filtroInspector" placeholder="Inspector..." oninput="renderHistorial()">
+            <input type="text" id="filtroModulo" placeholder="Módulo..." oninput="renderHistorial()">
+            <input type="date" id="filtroFecha" onchange="renderHistorial()">
+        </div>
+        <div id="histContenido"><div class="hist-empty" id="histEmpty">Cargando...</div></div>
+        <button class="btn-csv" id="btnCsv" onclick="exportarCSV()">⬇ Exportar CSV</button>
+    </div>
+</div>
+
+<div class="container">
+    <div class="print-only">REPORTE DE MUESTREO DE CALIDAD - C&S INDUSTRIES</div>
+
+    <!-- Banner instalación -->
+    <div id="installBanner">
+        <span>
+            <strong id="txt-install-title">📲 Instalar App</strong>
+            <span id="txt-install-desc">Agregar a pantalla de inicio para usar sin internet</span>
+        </span>
+        <button class="btn-install" id="btnInstall">Instalar</button>
+        <button class="btn-dismiss" id="btnDismiss">✕</button>
+    </div>
+
+    <div id="offlineIndicator" id="txt-offline">⚡ Modo sin conexión — La app funciona normalmente</div>
+
+    <div class="header-row">
+        <div>
+            <h1>C&S Industries</h1>
+            <p class="subtitle" id="txt-subtitle">Calculadora de Variabilidad</p>
+        </div>
+        <button class="btn-settings" onclick="openSettings()" title="Configuración">⚙️</button>
+    </div>
+    <p class="tech-subtitle" id="txt-techsub">Quality Dept. | Muestreo Aleatorio Variable MIL-STD-105E</p>
+
+    <div class="form-grid">
+        <div class="form-group full-width">
+            <label id="txt-lote-label">Tamaño del Lote (Piezas):</label>
+            <input type="number" id="loteTotal" placeholder="Ej: 50000">
+        </div>
+        <div class="form-group">
+            <label id="txt-nivel-label">Nivel de Inspección:</label>
+            <select id="nivelInspeccion" onchange="actualizarNotaAseguramiento()">
+                <option value="I">Nivel I / Level I</option>
+                <option value="II" selected>Nivel II / Level II</option>
+                <option value="III">Nivel III / Level III</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label id="txt-aql-label">Nivel AQL:</label>
+            <select id="aqlLevel" onchange="actualizarNotaAseguramiento()">
+                <option value="0.010">0.010</option>
+                <option value="0.015">0.015</option>
+                <option value="0.025">0.025</option>
+                <option value="0.040">0.040</option>
+                <option value="0.065">0.065</option>
+                <option value="0.10">0.10</option>
+                <option value="0.15">0.15</option>
+                <option value="0.25">0.25</option>
+                <option value="0.40">0.40</option>
+                <option value="0.65" selected>0.65</option>
+                <option value="1.0">1.0</option>
+                <option value="1.5">1.5</option>
+                <option value="2.5">2.5</option>
+                <option value="4.0">4.0</option>
+                <option value="6.5">6.5</option>
+                <option value="10">10</option>
+                <option value="15">15</option>
+                <option value="25">25</option>
+                <option value="40">40</option>
+                <option value="65">65</option>
+                <option value="100">100</option>
+                <option value="150">150</option>
+                <option value="250">250</option>
+                <option value="400">400</option>
+                <option value="650">650</option>
+                <option value="1000">1000</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label id="txt-cajas-label">Total de Cajas en Lote:</label>
+            <input type="number" id="cajasFisicas" placeholder="Opcional / Optional">
+        </div>
+        <div class="form-group">
+            <label id="txt-cap-label">Capacidad Máx. Caja:</label>
+            <input type="number" id="unidadesPorCaja" placeholder="Opcional / Optional">
+        </div>
+        <div class="form-group">
+            <label id="txt-inspector-label">Inspector:</label>
+            <input type="text" id="inspectorNombre" placeholder="Ej: Juan Pérez" maxlength="60">
+        </div>
+        <div class="form-group">
+            <label id="txt-modulo-label">Módulo / Área:</label>
+            <input type="text" id="moduloArea" placeholder="Ej: Módulo A" maxlength="40" list="modulosList">
+            <datalist id="modulosList">
+                <option value="Módulo A"></option>
+                <option value="Módulo B"></option>
+                <option value="Módulo C"></option>
+                <option value="Recibo"></option>
+                <option value="Empaque"></option>
+                <option value="Producto Terminado"></option>
+            </datalist>
+        </div>
+        <div class="form-group full-width">
+            <label id="txt-obs-label">Observaciones (opcional):</label>
+            <input type="text" id="observaciones" placeholder="Opcional / Optional" maxlength="200">
+        </div>
+    </div>
+
+    <div id="aseguramientoNota" class="aseguramiento-box">
+        <div id="percVal" class="porcentaje-badge">0%</div>
+        <div id="percText"></div>
+    </div>
+
+    <div class="button-group">
+        <button class="btn-generate" id="btnGenerar" onclick="ejecutarAuditoria()">Generar Auditoría</button>
+        <button id="btnPrint" class="btn-print" onclick="window.print()">Imprimir Reporte</button>
+    </div>
+    <div class="button-group" style="margin-top:-10px;">
+        <button class="btn-history" id="btnHistorial" onclick="abrirHistorial()">📋 Historial de Inspecciones</button>
+    </div>
+    <div id="cloudStatus" class="cloud-status"></div>
+
+    <div id="errorMsg" class="error"></div>
+
+    <div id="resumen" class="summary-box">
+        <strong id="txt-strategy">Estrategia de Inspección:</strong><br>
+        <span id="txt-folio">• Folio:</span> <strong id="folioReporte">-</strong><br>
+        <span id="txt-inspector-rep">• Inspector:</span> <span id="inspectorReporte">-</span> | <span id="txt-modulo-rep">Módulo:</span> <span id="moduloReporte">-</span><br>
+        <span id="txt-fecha-rep">• Fecha/Hora:</span> <span id="fechaReporte">-</span><br>
+        <span id="txt-lot-size">• Tamaño de Lote:</span> <span id="loteReporte">-</span> <span id="txt-units">unidades</span>.<br>
+        <span id="txt-sample-size">• Tamaño de Muestra (n):</span> <span id="nMuestra" style="font-weight:bold">0</span><br>
+        <span id="txt-code-letter">• Letra Código:</span> <span id="letraCodigo">-</span> | AQL: <span id="aqlVal">-</span><br>
+        <div class="status-badge ac-badge"><span id="txt-ac">Aceptar (Ac) con:</span> ≤ <span id="acVal">0</span> <span id="txt-defects-ac">defectuosos</span></div>
+        <div class="status-badge re-badge"><span id="txt-re">Rechazar (Re) con:</span> ≥ <span id="reVal">0</span> <span id="txt-defects-re">defectuosos</span></div>
+    </div>
+
+    <table id="tablaResultados">
+        <thead>
+            <tr>
+                <th id="txt-col-box">Caja Seleccionada</th>
+                <th id="txt-col-qty">Cantidad a Inspeccionar (Random)</th>
+            </tr>
+        </thead>
+        <tbody id="cuerpoTabla"></tbody>
+        <tfoot>
+            <tr class="total-footer">
+                <td id="txt-total-label">TOTAL FINAL A INSPECCIONAR</td>
+                <td id="sumaFinal">0</td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <p id="txt-author" style="margin-top: 22px; text-align: center; font-size: 11.5px; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 14px;"></p>
+</div>
+
+<!-- Firebase SDK (compat) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+// ══════════════════════════════════════════════════════
+//  Service Worker
+// ══════════════════════════════════════════════════════
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+            .then(r => console.log('[SW] registrado:', r.scope))
+            .catch(e => console.warn('[SW] error:', e));
+    });
+}
+
+// ══════════════════════════════════════════════════════
+//  Textos ES / EN
+// ══════════════════════════════════════════════════════
+const TEXTS = {
+    es: {
+        'txt-subtitle':       'Calculadora de Variabilidad',
+        'txt-techsub':        'Quality Dept. | Muestreo Aleatorio Variable MIL-STD-105E',
+        'txt-lote-label':     'Tamaño del Lote (Piezas):',
+        'txt-nivel-label':    'Nivel de Inspección:',
+        'txt-aql-label':      'Nivel AQL:',
+        'txt-cajas-label':    'Total de Cajas en Lote:',
+        'txt-cap-label':      'Capacidad Máx. Caja:',
+        'btnGenerar':         'Generar Auditoría',
+        'btnPrint':           'Imprimir Reporte',
+        'txt-strategy':       'Estrategia de Inspección:',
+        'txt-lot-size':       '• Tamaño de Lote:',
+        'txt-units':          'unidades',
+        'txt-sample-size':    '• Tamaño de Muestra (n):',
+        'txt-code-letter':    '• Letra Código:',
+        'txt-ac':             'Aceptar (Ac) con:',
+        'txt-re':             'Rechazar (Re) con:',
+        'txt-defects-ac':     'defectuosos',
+        'txt-defects-re':     'defectuosos',
+        'txt-col-box':        'Caja Seleccionada',
+        'txt-col-qty':        'Cantidad a Inspeccionar (Random)',
+        'txt-total-label':    'TOTAL FINAL A INSPECCIONAR',
+        'txt-install-title':  '📲 Instalar App',
+        'txt-install-desc':   'Agregar a pantalla de inicio para usar sin internet',
+        'btnInstall':         'Instalar',
+        'txt-settings-title': '⚙️ Configuración',
+        'txt-dark-label':     'Tema oscuro',
+        'txt-dark-desc':      'Reduce el brillo de pantalla',
+        'txt-lang-label':     'Idioma / Language',
+        'txt-lang-desc':      'Español · English',
+        'alert-invalid':      'Ingrese un lote válido.',
+        'error-capacity':     '⚠️ Muestra excede capacidad física de las cajas seleccionadas.',
+        'aql-max':            'MÁXIMA',
+        'aql-std':            'ESTÁNDAR (Normal)',
+        'aql-red':            'REDUCIDA',
+        'aql-text':           'Sensibilidad del Plan de Muestreo',
+        'aql-conf':           'Confianza estadística del plan para detectar lotes fuera de norma bajo AQL',
+        'general-sample':     'Muestreo General (Lote Suelto)',
+        'print-header':       'REPORTE DE MUESTREO DE CALIDAD - C&S INDUSTRIES',
+        'offline-msg':        '⚡ Modo sin conexión — La app funciona normalmente',
+        'txt-inspector-label':'Inspector:',
+        'txt-modulo-label':   'Módulo / Área:',
+        'txt-obs-label':      'Observaciones (opcional):',
+        'txt-folio':          '• Folio:',
+        'txt-inspector-rep':  '• Inspector:',
+        'txt-modulo-rep':     'Módulo:',
+        'txt-fecha-rep':      '• Fecha/Hora:',
+        'btnHistorial':       '📋 Historial de Inspecciones',
+        'txt-hist-title':     '📋 Historial de Inspecciones',
+        'btnCsv':             '⬇ Exportar CSV',
+        'alert-inspector':    'Ingrese el nombre del inspector.',
+        'alert-modulo':       'Ingrese el módulo o área.',
+        'cloud-noconfig':     '☁️ Nube no configurada (ver GUIA-FIREBASE.md)',
+        'cloud-ok':           '☁️ Conectado a la nube',
+        'cloud-saving':       '☁️ Guardando reporte...',
+        'cloud-saved':        '✅ Reporte guardado en la nube',
+        'cloud-saveerr':      '⚠️ Error al guardar — verifique conexión',
+        'cloud-autherr':      '⚠️ Error de autenticación con Firebase',
+        'cloud-initerr':      '⚠️ Error al iniciar Firebase',
+        'cloud-offline-queue':'📴 Sin internet — se sincronizará automáticamente',
+        'hist-loading':       'Cargando reportes...',
+        'hist-empty':         'No hay reportes que coincidan.',
+        'hist-error':         'Error al cargar el historial.',
+        'hist-col-fecha':     'Fecha/Hora',
+        'hist-col-modulo':    'Módulo',
+        'author':             'Esta app fue elaborada por: <strong style="color:var(--text-sub)">Angel Perez</strong> · Quality Manager',
+    },
+    en: {
+        'txt-subtitle':       'Variability Calculator',
+        'txt-techsub':        'Quality Dept. | Variable Random Sampling MIL-STD-105E',
+        'txt-lote-label':     'Lot Size (Units):',
+        'txt-nivel-label':    'Inspection Level:',
+        'txt-aql-label':      'AQL Level:',
+        'txt-cajas-label':    'Total Boxes in Lot:',
+        'txt-cap-label':      'Max Box Capacity:',
+        'btnGenerar':         'Generate Audit',
+        'btnPrint':           'Print Report',
+        'txt-strategy':       'Inspection Strategy:',
+        'txt-lot-size':       '• Lot Size:',
+        'txt-units':          'units',
+        'txt-sample-size':    '• Sample Size (n):',
+        'txt-code-letter':    '• Code Letter:',
+        'txt-ac':             'Accept (Ac) with:',
+        'txt-re':             'Reject (Re) with:',
+        'txt-defects-ac':     'defectives',
+        'txt-defects-re':     'defectives',
+        'txt-col-box':        'Selected Box',
+        'txt-col-qty':        'Qty to Inspect (Random)',
+        'txt-total-label':    'TOTAL TO INSPECT',
+        'txt-install-title':  '📲 Install App',
+        'txt-install-desc':   'Add to home screen for offline use',
+        'btnInstall':         'Install',
+        'txt-settings-title': '⚙️ Settings',
+        'txt-dark-label':     'Dark mode',
+        'txt-dark-desc':      'Reduces screen brightness',
+        'txt-lang-label':     'Language / Idioma',
+        'txt-lang-desc':      'English · Español',
+        'alert-invalid':      'Please enter a valid lot size.',
+        'error-capacity':     '⚠️ Sample exceeds physical capacity of selected boxes.',
+        'aql-max':            'MAXIMUM',
+        'aql-std':            'STANDARD (Normal)',
+        'aql-red':            'REDUCED',
+        'aql-text':           'Sampling Plan Sensitivity',
+        'aql-conf':           'Statistical confidence of the plan to detect out-of-spec lots at AQL',
+        'general-sample':     'General Sampling (Loose Lot)',
+        'print-header':       'QUALITY SAMPLING REPORT - C&S INDUSTRIES',
+        'offline-msg':        '⚡ Offline mode — App works normally',
+        'txt-inspector-label':'Inspector:',
+        'txt-modulo-label':   'Module / Area:',
+        'txt-obs-label':      'Notes (optional):',
+        'txt-folio':          '• Report ID:',
+        'txt-inspector-rep':  '• Inspector:',
+        'txt-modulo-rep':     'Module:',
+        'txt-fecha-rep':      '• Date/Time:',
+        'btnHistorial':       '📋 Inspection History',
+        'txt-hist-title':     '📋 Inspection History',
+        'btnCsv':             '⬇ Export CSV',
+        'alert-inspector':    'Enter the inspector name.',
+        'alert-modulo':       'Enter the module or area.',
+        'cloud-noconfig':     '☁️ Cloud not configured (see GUIA-FIREBASE.md)',
+        'cloud-ok':           '☁️ Connected to cloud',
+        'cloud-saving':       '☁️ Saving report...',
+        'cloud-saved':        '✅ Report saved to cloud',
+        'cloud-saveerr':      '⚠️ Save error — check connection',
+        'cloud-autherr':      '⚠️ Firebase authentication error',
+        'cloud-initerr':      '⚠️ Firebase initialization error',
+        'cloud-offline-queue':'📴 Offline — will sync automatically',
+        'hist-loading':       'Loading reports...',
+        'hist-empty':         'No matching reports.',
+        'hist-error':         'Error loading history.',
+        'hist-col-fecha':     'Date/Time',
+        'hist-col-modulo':    'Module',
+        'author':             'This app was developed by: <strong style="color:var(--text-sub)">Angel Perez</strong> · Quality Manager',
+    }
+};
+
+let currentLang = localStorage.getItem('lang') || 'es';
+let currentTheme = localStorage.getItem('theme') || 'light';
+
+function t(key) { return TEXTS[currentLang][key] || key; }
+
+function applyTexts() {
+    const ids = [
+        'txt-subtitle','txt-techsub','txt-lote-label','txt-nivel-label',
+        'txt-aql-label','txt-cajas-label','txt-cap-label','btnGenerar','btnPrint',
+        'txt-strategy','txt-lot-size','txt-units','txt-sample-size','txt-code-letter',
+        'txt-ac','txt-re','txt-defects-ac','txt-defects-re',
+        'txt-col-box','txt-col-qty','txt-total-label',
+        'txt-install-title','txt-install-desc','btnInstall',
+        'txt-settings-title','txt-dark-label','txt-dark-desc','txt-lang-label','txt-lang-desc',
+        'txt-inspector-label','txt-modulo-label','txt-obs-label',
+        'txt-folio','txt-inspector-rep','txt-modulo-rep','txt-fecha-rep',
+        'btnHistorial','txt-hist-title','btnCsv'
+    ];
+    ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerText = t(id);
+    });
+    document.getElementById('offlineIndicator').innerText = t('offline-msg');
+    document.getElementById('txt-author').innerHTML = t('author');
+    document.documentElement.lang = currentLang;
+    document.getElementById('btn-es').classList.toggle('active', currentLang === 'es');
+    document.getElementById('btn-en').classList.toggle('active', currentLang === 'en');
+    // Refresca la nota si está visible
+    if (document.getElementById('aseguramientoNota').style.display !== 'none') {
+        actualizarNotaAseguramiento();
+    }
+}
+
+function setLang(lang) {
+    currentLang = lang;
+    localStorage.setItem('lang', lang);
+    applyTexts();
+}
+
+// ══════════════════════════════════════════════════════
+//  Tema oscuro
+// ══════════════════════════════════════════════════════
+function applyTheme() {
+    const isDark = document.getElementById('darkToggle').checked;
+    currentTheme = isDark ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    localStorage.setItem('theme', currentTheme);
+}
+
+// ══════════════════════════════════════════════════════
+//  Modal de configuración
+// ══════════════════════════════════════════════════════
+function openSettings() {
+    document.getElementById('settingsModal').classList.add('open');
+}
+function closeSettings() {
+    document.getElementById('settingsModal').classList.remove('open');
+}
+function closeSettingsOnOverlay(e) {
+    if (e.target === document.getElementById('settingsModal')) closeSettings();
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeSettings(); cerrarHistorial(); } });
+
+// ══════════════════════════════════════════════════════
+//  Banner instalación PWA
+// ══════════════════════════════════════════════════════
+let deferredPrompt;
+const installBanner = document.getElementById('installBanner');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBanner.classList.add('show');
+});
+
+document.getElementById('btnInstall').addEventListener('click', async () => {
+    installBanner.classList.remove('show');
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        await deferredPrompt.userChoice;
+        deferredPrompt = null;
+    }
+});
+
+document.getElementById('btnDismiss').addEventListener('click', () => {
+    installBanner.classList.remove('show');
+});
+
+window.addEventListener('appinstalled', () => installBanner.classList.remove('show'));
+
+// Offline
+function updateOnlineStatus() {
+    document.getElementById('offlineIndicator').style.display = navigator.onLine ? 'none' : 'block';
+}
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+updateOnlineStatus();
+
+// ══════════════════════════════════════════════════════
+//  Firebase — Configuración
+//  ⚠️ PEGA AQUÍ TU CONFIGURACIÓN DE FIREBASE (ver GUIA-FIREBASE.md)
+// ══════════════════════════════════════════════════════
+const FIREBASE_CONFIG = {
+    apiKey: "PEGA_AQUI",
+    authDomain: "PEGA_AQUI.firebaseapp.com",
+    projectId: "PEGA_AQUI",
+    storageBucket: "PEGA_AQUI.appspot.com",
+    messagingSenderId: "PEGA_AQUI",
+    appId: "PEGA_AQUI"
+};
+
+let db = null;
+let cloudReady = false;
+
+function setCloudStatus(cls, msg) {
+    const el = document.getElementById('cloudStatus');
+    el.className = 'cloud-status ' + cls;
+    el.innerText = msg;
+}
+
+(function initFirebase() {
+    if (typeof firebase === 'undefined') {
+        setCloudStatus('err', t('cloud-initerr'));
+        return;
+    }
+    if (FIREBASE_CONFIG.apiKey === "PEGA_AQUI") {
+        setCloudStatus('err', t('cloud-noconfig'));
+        return;
+    }
+    try {
+        firebase.initializeApp(FIREBASE_CONFIG);
+        db = firebase.firestore();
+        // Persistencia offline: los reportes se guardan localmente
+        // y se sincronizan solos cuando vuelve el internet
+        db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
+        firebase.auth().signInAnonymously()
+            .then(() => {
+                cloudReady = true;
+                setCloudStatus('ok', t('cloud-ok'));
+            })
+            .catch(err => {
+                console.warn('[Firebase] auth error:', err);
+                setCloudStatus('err', t('cloud-autherr'));
+            });
+    } catch (e) {
+        console.warn('[Firebase] init error:', e);
+        setCloudStatus('err', t('cloud-initerr'));
+    }
+})();
+
+// ══════════════════════════════════════════════════════
+//  Reportes — Guardado en Firestore
+// ══════════════════════════════════════════════════════
+function generarFolio() {
+    const d = new Date();
+    const p = n => String(n).padStart(2, '0');
+    const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
+    return `CS-${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}-${rand}`;
+}
+
+function guardarReporte(reporte) {
+    if (!db) {
+        setCloudStatus('err', t('cloud-noconfig'));
+        return;
+    }
+    setCloudStatus('pending', t('cloud-saving'));
+    db.collection('reportes').doc(reporte.folio).set(reporte)
+        .then(() => setCloudStatus('ok', t('cloud-saved') + ' — ' + reporte.folio))
+        .catch(err => {
+            console.warn('[Firestore] error:', err);
+            setCloudStatus('err', t('cloud-saveerr'));
+        });
+    // Con persistencia offline activada, si no hay internet el .set()
+    // queda pendiente y se sincroniza automáticamente al reconectar
+    if (!navigator.onLine) {
+        setCloudStatus('pending', t('cloud-offline-queue') + ' — ' + reporte.folio);
+    }
+}
+
+// ══════════════════════════════════════════════════════
+//  Historial de inspecciones
+// ══════════════════════════════════════════════════════
+let historialCache = [];
+
+function abrirHistorial() {
+    document.getElementById('historialModal').classList.add('open');
+    if (!db) {
+        document.getElementById('histContenido').innerHTML =
+            `<div class="hist-empty">${t('cloud-noconfig')}</div>`;
+        return;
+    }
+    document.getElementById('histContenido').innerHTML =
+        `<div class="hist-empty">${t('hist-loading')}</div>`;
+    db.collection('reportes').orderBy('creadoEn', 'desc').limit(200).get()
+        .then(snap => {
+            historialCache = snap.docs.map(d => d.data());
+            renderHistorial();
+        })
+        .catch(err => {
+            console.warn('[Firestore] historial:', err);
+            document.getElementById('histContenido').innerHTML =
+                `<div class="hist-empty">${t('hist-error')}</div>`;
+        });
+}
+function cerrarHistorial() {
+    document.getElementById('historialModal').classList.remove('open');
+}
+
+function filtrarHistorial() {
+    const fi = document.getElementById('filtroInspector').value.trim().toLowerCase();
+    const fm = document.getElementById('filtroModulo').value.trim().toLowerCase();
+    const ff = document.getElementById('filtroFecha').value; // YYYY-MM-DD
+    return historialCache.filter(r => {
+        if (fi && !(r.inspector || '').toLowerCase().includes(fi)) return false;
+        if (fm && !(r.modulo || '').toLowerCase().includes(fm)) return false;
+        if (ff && (r.fechaLocal || '').substring(0, 10) !== ff) return false;
+        return true;
+    });
+}
+
+function renderHistorial() {
+    const datos = filtrarHistorial();
+    const cont = document.getElementById('histContenido');
+    if (!datos.length) {
+        cont.innerHTML = `<div class="hist-empty">${t('hist-empty')}</div>`;
+        return;
+    }
+    let html = `<table class="hist-table"><thead><tr>
+        <th>Folio</th><th>${t('hist-col-fecha')}</th><th>Inspector</th>
+        <th>${t('hist-col-modulo')}</th><th>Lote</th><th>n</th><th>AQL</th><th>Ac/Re</th>
+    </tr></thead><tbody>`;
+    datos.forEach(r => {
+        html += `<tr>
+            <td style="font-size:10px">${r.folio || '-'}</td>
+            <td>${(r.fechaLocal || '').substring(0, 16).replace('T', ' ')}</td>
+            <td>${r.inspector || '-'}</td>
+            <td>${r.modulo || '-'}</td>
+            <td>${(r.lote || 0).toLocaleString()}</td>
+            <td>${r.muestra || '-'}</td>
+            <td>${r.aql || '-'}</td>
+            <td>${r.ac}/${r.re}</td>
+        </tr>`;
+    });
+    html += '</tbody></table>';
+    cont.innerHTML = html;
+}
+
+function exportarCSV() {
+    const datos = filtrarHistorial();
+    if (!datos.length) { alert(t('hist-empty')); return; }
+    const cab = ['Folio','FechaHora','Inspector','Modulo','Lote','LetraCodigo','Nivel','AQL','Muestra_n','Ac','Re','Observaciones'];
+    const filas = datos.map(r => [
+        r.folio, (r.fechaLocal || '').replace('T', ' '), r.inspector, r.modulo,
+        r.lote, r.letra, r.nivel, r.aql, r.muestra, r.ac, r.re,
+        '"' + String(r.observaciones || '').replace(/"/g, '""') + '"'
+    ].join(','));
+    const csv = '\uFEFF' + cab.join(',') + '\n' + filas.join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'reportes_inspeccion_' + new Date().toISOString().substring(0, 10) + '.csv';
+    a.click();
+    URL.revokeObjectURL(a.href);
+}
+
+// ══════════════════════════════════════════════════════
+//  Lógica MIL-STD-105E
+// ══════════════════════════════════════════════════════
+const milStd = {
+    '2-8':         {I:'A',II:'A',III:'B'}, '9-15':        {I:'A',II:'B',III:'C'},
+    '16-25':       {I:'B',II:'C',III:'D'}, '26-50':       {I:'C',II:'D',III:'E'},
+    '51-90':       {I:'C',II:'E',III:'F'}, '91-150':      {I:'D',II:'F',III:'G'},
+    '151-280':     {I:'E',II:'G',III:'H'}, '281-500':     {I:'F',II:'H',III:'J'},
+    '501-1200':    {I:'G',II:'J',III:'K'}, '1201-3200':   {I:'H',II:'K',III:'L'},
+    '3201-10000':  {I:'J',II:'L',III:'M'}, '10001-35000': {I:'K',II:'M',III:'N'},
+    '35001-150000':{I:'L',II:'N',III:'P'}, '150001-500000':{I:'M',II:'P',III:'Q'},
+    '500001-9999999':{I:'N',II:'Q',III:'R'}
+};
+const sizes = {A:2,B:3,C:5,D:8,E:13,F:20,G:32,H:50,J:80,K:125,L:200,M:315,N:500,P:800,Q:1250,R:2000};
+
+function actualizarNotaAseguramiento() {
+    const aql = parseFloat(document.getElementById('aqlLevel').value);
+    const nivel = document.getElementById('nivelInspeccion').value;
+    const notaBox = document.getElementById('aseguramientoNota');
+    let porcentaje, confiabilidad;
+    if (nivel === 'III')      { porcentaje = aql <= 0.65 ? 99 : 98; confiabilidad = t('aql-max'); }
+    else if (nivel === 'II')  { porcentaje = aql <= 0.65 ? 95 : 92; confiabilidad = t('aql-std'); }
+    else                      { porcentaje = aql <= 0.65 ? 85 : 80; confiabilidad = t('aql-red'); }
+    document.getElementById('percVal').innerText = porcentaje + '%';
+    document.getElementById('percText').innerHTML =
+        `<strong>${t('aql-text')}: ${confiabilidad}</strong><br>
+         ${t('aql-conf')} ${aql}.`;
+    notaBox.style.display = 'block';
+}
+
+function ejecutarAuditoria() {
+    const lote = parseInt(document.getElementById('loteTotal').value);
+    const capMaxInput = parseInt(document.getElementById('unidadesPorCaja').value) || 0;
+    let totalCajas = parseInt(document.getElementById('cajasFisicas').value) || 0;
+    const nivel = document.getElementById('nivelInspeccion').value;
+    const aql = parseFloat(document.getElementById('aqlLevel').value);
+    const inspector = document.getElementById('inspectorNombre').value.trim();
+    const modulo = document.getElementById('moduloArea').value.trim();
+    const observaciones = document.getElementById('observaciones').value.trim();
+    const errorDiv = document.getElementById('errorMsg');
+    errorDiv.style.display = 'none';
+
+    if (!lote || lote < 2) { alert(t('alert-invalid')); return; }
+    if (!inspector) { alert(t('alert-inspector')); return; }
+    if (!modulo) { alert(t('alert-modulo')); return; }
+    // Recordar inspector y módulo para la próxima auditoría
+    localStorage.setItem('lastInspector', inspector);
+    localStorage.setItem('lastModulo', modulo);
+    if (capMaxInput > 0 && totalCajas === 0) totalCajas = Math.ceil(lote / capMaxInput);
+
+    let letra = 'A';
+    for (const r in milStd) {
+        const [mn, mx] = r.split('-').map(Number);
+        if (lote >= mn && lote <= mx) { letra = milStd[r][nivel]; break; }
+    }
+    const n = sizes[letra];
+
+    let numCajasAudit;
+    if (totalCajas > 0) {
+        numCajasAudit = totalCajas < 10
+            ? totalCajas
+            : Math.floor(Math.random() * (Math.min(totalCajas, 20) - 10 + 1)) + 10;
+    } else { numCajasAudit = 1; }
+
+    if (capMaxInput > 0 && numCajasAudit * capMaxInput < n) {
+        errorDiv.innerText = t('error-capacity');
+        errorDiv.style.display = 'block'; return;
+    }
+
+    let dist = new Array(numCajasAudit).fill(numCajasAudit > 1 ? 1 : 0);
+    let rem = numCajasAudit > 1 ? n - numCajasAudit : n;
+    let safe = 0;
+    while (rem > 0 && safe < 20000) {
+        let i = Math.floor(Math.random() * numCajasAudit);
+        if (capMaxInput === 0 || dist[i] < capMaxInput) { dist[i]++; rem--; }
+        safe++;
+    }
+
+    const ac = Math.floor(n * (aql / 100));
+    const re = ac + 1;
+
+    // ── Trazabilidad ──
+    const folio = generarFolio();
+    const ahora = new Date();
+    const fechaLocal = new Date(ahora.getTime() - ahora.getTimezoneOffset() * 60000)
+        .toISOString().substring(0, 19); // YYYY-MM-DDTHH:MM:SS hora local
+
+    document.getElementById('folioReporte').innerText = folio;
+    document.getElementById('inspectorReporte').innerText = inspector;
+    document.getElementById('moduloReporte').innerText = modulo;
+    document.getElementById('fechaReporte').innerText = fechaLocal.replace('T', ' ');
+
+    document.getElementById('loteReporte').innerText = lote.toLocaleString();
+    document.getElementById('nMuestra').innerText = n;
+    document.getElementById('letraCodigo').innerText = letra;
+    document.getElementById('aqlVal').innerText = aql;
+    document.getElementById('acVal').innerText = ac;
+    document.getElementById('reVal').innerText = re;
+    document.getElementById('sumaFinal').innerText = n;
+    document.getElementById('resumen').style.display = 'block';
+    document.getElementById('tablaResultados').style.display = 'table';
+    document.getElementById('btnPrint').style.display = 'inline-block';
+
+    const cuerpo = document.getElementById('cuerpoTabla');
+    cuerpo.innerHTML = '';
+    let distribucionReporte = [];
+    if (totalCajas > 0) {
+        let labels = [];
+        while (labels.length < numCajasAudit) {
+            let r = Math.floor(Math.random() * totalCajas) + 1;
+            if (!labels.includes(r)) labels.push(r);
+        }
+        labels.sort((a, b) => a - b);
+        labels.forEach((c, i) => {
+            cuerpo.innerHTML += `<tr><td>Box / Pallet #${c}</td><td><strong>${dist[i]}</strong></td></tr>`;
+            distribucionReporte.push({ caja: c, cantidad: dist[i] });
+        });
+    } else {
+        cuerpo.innerHTML = `<tr><td>${t('general-sample')}</td><td><strong>${n}</strong></td></tr>`;
+        distribucionReporte.push({ caja: 0, cantidad: n });
+    }
+    actualizarNotaAseguramiento();
+
+    // ── Guardar reporte en la nube ──
+    guardarReporte({
+        folio: folio,
+        inspector: inspector,
+        modulo: modulo,
+        observaciones: observaciones,
+        lote: lote,
+        nivel: nivel,
+        aql: aql,
+        letra: letra,
+        muestra: n,
+        ac: ac,
+        re: re,
+        totalCajas: totalCajas,
+        distribucion: distribucionReporte,
+        fechaLocal: fechaLocal,
+        creadoEn: (db ? firebase.firestore.FieldValue.serverTimestamp() : null),
+        dispositivo: navigator.userAgent.substring(0, 120)
+    });
+}
+
+// ══════════════════════════════════════════════════════
+//  Inicialización
+// ══════════════════════════════════════════════════════
+(function init() {
+    // Restaurar tema
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    document.getElementById('darkToggle').checked = currentTheme === 'dark';
+    // Restaurar idioma
+    applyTexts();
+    // Restaurar último inspector y módulo usados
+    document.getElementById('inspectorNombre').value = localStorage.getItem('lastInspector') || '';
+    document.getElementById('moduloArea').value = localStorage.getItem('lastModulo') || '';
+})();
+</script>
+</body>
+</html>
