@@ -335,6 +335,57 @@
         .cloud-status.pending { color: #ef6c00; }
         .cloud-status.err     { color: #c62828; }
 
+        /* ── Inicio de sesión ── */
+        .login-overlay {
+            position: fixed; inset: 0; z-index: 1000;
+            background: var(--bg);
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px;
+        }
+        .login-card {
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: 12px; padding: 30px 25px; width: 100%; max-width: 360px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15); text-align: center;
+        }
+        .login-card h1 { color: var(--brand); font-size: 22px; margin-bottom: 4px; }
+        .login-card .login-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+        .login-card input {
+            width: 100%; padding: 12px; margin-bottom: 12px;
+            border: 1px solid var(--border); border-radius: 8px;
+            font-size: 14px; background: var(--input-bg); color: var(--text);
+        }
+        .login-card button {
+            width: 100%; padding: 12px; border: none; border-radius: 8px;
+            background: var(--brand); color: white; font-size: 15px;
+            font-weight: bold; cursor: pointer;
+        }
+        .login-card button:hover { background: var(--brand-hover); }
+        .login-card button:disabled { opacity: 0.6; cursor: wait; }
+        .login-error { color: #c62828; font-size: 12.5px; font-weight: bold; margin-top: 10px; min-height: 16px; }
+
+        /* ── Barra de usuario ── */
+        .user-bar {
+            display: flex; align-items: center; justify-content: space-between;
+            background: var(--th-bg); border: 1px solid var(--border);
+            border-radius: 8px; padding: 7px 12px; margin-bottom: 14px;
+            font-size: 12.5px; color: var(--text);
+        }
+        .user-bar .role-badge {
+            font-weight: bold; color: var(--brand);
+        }
+        .btn-logout {
+            background: none; border: 1px solid var(--border); border-radius: 6px;
+            padding: 4px 10px; font-size: 12px; cursor: pointer; color: var(--text-muted);
+        }
+        .btn-logout:hover { border-color: #c62828; color: #c62828; }
+
+        /* ── Acciones del supervisor en historial ── */
+        .hist-btn {
+            border: none; background: none; cursor: pointer;
+            font-size: 14px; padding: 2px 4px;
+        }
+        .hist-btn:hover { transform: scale(1.2); }
+
         .modal-wide { max-width: 620px; max-height: 85vh; overflow-y: auto; }
         .hist-filters { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
         .hist-filters input { font-size: 12px; padding: 8px; }
@@ -428,6 +479,44 @@
     </div>
 </div>
 
+<!-- Pantalla de inicio de sesión -->
+<div class="login-overlay" id="loginOverlay">
+    <div class="login-card">
+        <h1>C&S Industries</h1>
+        <p class="login-sub" id="txt-login-sub">Calculadora de Variabilidad — Inicio de Sesión</p>
+        <input type="text" id="loginUser" placeholder="Usuario" autocomplete="username" onkeydown="if(event.key==='Enter')iniciarSesion()">
+        <input type="password" id="loginPass" placeholder="Contraseña" autocomplete="current-password" onkeydown="if(event.key==='Enter')iniciarSesion()">
+        <button id="btnLogin" onclick="iniciarSesion()">Entrar</button>
+        <div class="login-error" id="loginError"></div>
+    </div>
+</div>
+
+<!-- Modal de edición (solo supervisor) -->
+<div class="modal-overlay" id="editModal" onclick="if(event.target===this)cerrarEdicion()">
+    <div class="modal">
+        <div class="modal-header">
+            <h2 id="txt-edit-title">✏️ Corregir Reporte</h2>
+            <button class="modal-close" onclick="cerrarEdicion()">✕</button>
+        </div>
+        <p style="font-size:11.5px;color:var(--text-muted);margin-bottom:12px;">
+            Folio: <strong id="editFolio">-</strong>
+        </p>
+        <div class="form-group" style="margin-bottom:10px;">
+            <label>Inspector:</label>
+            <input type="text" id="editInspector" maxlength="60">
+        </div>
+        <div class="form-group" style="margin-bottom:10px;">
+            <label id="txt-edit-modulo">Módulo / Área:</label>
+            <input type="text" id="editModulo" maxlength="40">
+        </div>
+        <div class="form-group" style="margin-bottom:14px;">
+            <label id="txt-edit-obs">Observaciones:</label>
+            <input type="text" id="editObs" maxlength="200">
+        </div>
+        <button class="btn-csv" style="width:100%;margin:0;" id="btnGuardarEdicion" onclick="guardarEdicion()">💾 Guardar Cambios</button>
+    </div>
+</div>
+
 <div class="container">
     <div class="print-only">REPORTE DE MUESTREO DE CALIDAD - C&S INDUSTRIES</div>
 
@@ -451,6 +540,11 @@
         <button class="btn-settings" onclick="openSettings()" title="Configuración">⚙️</button>
     </div>
     <p class="tech-subtitle" id="txt-techsub">Quality Dept. | Muestreo Aleatorio Variable MIL-STD-105E</p>
+
+    <div class="user-bar" id="userBar" style="display:none;">
+        <span>👤 <span id="userName">-</span> · <span class="role-badge" id="userRoleBadge">-</span></span>
+        <button class="btn-logout" id="btnLogout" onclick="cerrarSesion()">Cerrar sesión</button>
+    </div>
 
     <div class="form-grid">
         <div class="form-group full-width">
@@ -659,6 +753,25 @@ const TEXTS = {
         'hist-error':         'Error al cargar el historial.',
         'hist-col-fecha':     'Fecha/Hora',
         'hist-col-modulo':    'Módulo',
+        'hist-col-acciones':  'Acciones',
+        'txt-login-sub':      'Calculadora de Variabilidad — Inicio de Sesión',
+        'btnLogin':           'Entrar',
+        'btnLogout':          'Cerrar sesión',
+        'login-empty':        'Ingrese usuario y contraseña.',
+        'login-baduser':      'Usuario no reconocido.',
+        'login-badpass':      'Usuario o contraseña incorrectos.',
+        'login-network':      'Sin conexión — se requiere internet para iniciar sesión.',
+        'role-supervisor':    'Supervisor',
+        'role-inspector':     'Inspector',
+        'role-datos':         'Datos de Inspección',
+        'txt-edit-title':     '✏️ Corregir Reporte',
+        'txt-edit-modulo':    'Módulo / Área:',
+        'txt-edit-obs':       'Observaciones:',
+        'btnGuardarEdicion':  '💾 Guardar Cambios',
+        'edit-required':      'Inspector y módulo no pueden quedar vacíos.',
+        'edit-error':         'Error al guardar la corrección — verifique permisos y conexión.',
+        'delete-confirm':     '¿Borrar este reporte de forma permanente?',
+        'delete-error':       'Error al borrar — verifique permisos y conexión.',
         'author':             'Esta app fue elaborada por: <strong style="color:var(--text-sub)">Angel Perez</strong> · Quality Manager',
     },
     en: {
@@ -726,6 +839,25 @@ const TEXTS = {
         'hist-error':         'Error loading history.',
         'hist-col-fecha':     'Date/Time',
         'hist-col-modulo':    'Module',
+        'hist-col-acciones':  'Actions',
+        'txt-login-sub':      'Variability Calculator — Sign In',
+        'btnLogin':           'Sign In',
+        'btnLogout':          'Sign out',
+        'login-empty':        'Enter username and password.',
+        'login-baduser':      'Unknown user.',
+        'login-badpass':      'Wrong username or password.',
+        'login-network':      'Offline — internet is required to sign in.',
+        'role-supervisor':    'Supervisor',
+        'role-inspector':     'Inspector',
+        'role-datos':         'Inspection Data',
+        'txt-edit-title':     '✏️ Correct Report',
+        'txt-edit-modulo':    'Module / Area:',
+        'txt-edit-obs':       'Notes:',
+        'btnGuardarEdicion':  '💾 Save Changes',
+        'edit-required':      'Inspector and module cannot be empty.',
+        'edit-error':         'Error saving correction — check permissions and connection.',
+        'delete-confirm':     'Permanently delete this report?',
+        'delete-error':       'Error deleting — check permissions and connection.',
         'author':             'This app was developed by: <strong style="color:var(--text-sub)">Angel Perez</strong> · Quality Manager',
     }
 };
@@ -746,7 +878,9 @@ function applyTexts() {
         'txt-settings-title','txt-dark-label','txt-dark-desc','txt-lang-label','txt-lang-desc',
         'txt-inspector-label','txt-modulo-label','txt-obs-label',
         'txt-folio','txt-inspector-rep','txt-modulo-rep','txt-fecha-rep',
-        'btnHistorial','txt-hist-title','btnCsv'
+        'btnHistorial','txt-hist-title','btnCsv',
+        'txt-login-sub','btnLogin','btnLogout',
+        'txt-edit-title','txt-edit-modulo','txt-edit-obs','btnGuardarEdicion'
     ];
     ids.forEach(id => {
         const el = document.getElementById(id);
@@ -767,6 +901,7 @@ function setLang(lang) {
     currentLang = lang;
     localStorage.setItem('lang', lang);
     applyTexts();
+    if (typeof aplicarRolUI === 'function') aplicarRolUI();
 }
 
 // ══════════════════════════════════════════════════════
@@ -791,7 +926,7 @@ function closeSettings() {
 function closeSettingsOnOverlay(e) {
     if (e.target === document.getElementById('settingsModal')) closeSettings();
 }
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeSettings(); cerrarHistorial(); } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeSettings(); if (typeof cerrarHistorial === 'function') cerrarHistorial(); if (typeof cerrarEdicion === 'function') cerrarEdicion(); } });
 
 // ══════════════════════════════════════════════════════
 //  Banner instalación PWA
@@ -850,6 +985,66 @@ function setCloudStatus(cls, msg) {
     el.innerText = msg;
 }
 
+// ══════════════════════════════════════════════════════
+//  Sistema de roles
+//  Los usuarios y contraseñas se administran en Firebase
+//  Authentication — NO están escritos en este código.
+// ══════════════════════════════════════════════════════
+const AUTH_DOMAIN_APP = 'cs-variabilidad.app';
+// Mapa: nombre de usuario (minúsculas) → rol
+const ROLES = {
+    'managerqc':   'supervisor',
+    'inspectorqc': 'inspector',
+    'qcdb':        'datos'
+};
+let currentRole = null;
+let currentUserName = null;
+
+function usuarioAEmail(usuario) {
+    return usuario.toLowerCase().trim() + '@' + AUTH_DOMAIN_APP;
+}
+function emailARol(email) {
+    const usuario = (email || '').split('@')[0].toLowerCase();
+    return ROLES[usuario] || null;
+}
+
+function iniciarSesion() {
+    const usuario = document.getElementById('loginUser').value.trim();
+    const pass = document.getElementById('loginPass').value;
+    const errEl = document.getElementById('loginError');
+    errEl.innerText = '';
+    if (!usuario || !pass) { errEl.innerText = t('login-empty'); return; }
+    if (!ROLES[usuario.toLowerCase()]) { errEl.innerText = t('login-baduser'); return; }
+    const btn = document.getElementById('btnLogin');
+    btn.disabled = true;
+    firebase.auth().signInWithEmailAndPassword(usuarioAEmail(usuario), pass)
+        .then(() => { btn.disabled = false; })
+        .catch(err => {
+            btn.disabled = false;
+            console.warn('[Auth]', err.code);
+            if (err.code === 'auth/network-request-failed') errEl.innerText = t('login-network');
+            else errEl.innerText = t('login-badpass');
+        });
+}
+
+function cerrarSesion() {
+    firebase.auth().signOut();
+}
+
+function aplicarRolUI() {
+    const bar = document.getElementById('userBar');
+    const btnHist = document.getElementById('btnHistorial');
+    if (!currentRole) {
+        bar.style.display = 'none';
+        return;
+    }
+    bar.style.display = 'flex';
+    document.getElementById('userName').innerText = currentUserName;
+    document.getElementById('userRoleBadge').innerText = t('role-' + currentRole);
+    // Inspectores NO ven el historial de inspecciones
+    btnHist.style.display = (currentRole === 'inspector') ? 'none' : 'block';
+}
+
 (function initFirebase() {
     if (typeof firebase === 'undefined') {
         setCloudStatus('err', t('cloud-initerr'));
@@ -865,15 +1060,25 @@ function setCloudStatus(cls, msg) {
         // Persistencia offline: los reportes se guardan localmente
         // y se sincronizan solos cuando vuelve el internet
         db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
-        firebase.auth().signInAnonymously()
-            .then(() => {
+        // Control de sesión: muestra el login o la app según el estado
+        firebase.auth().onAuthStateChanged(user => {
+            const overlay = document.getElementById('loginOverlay');
+            if (user && emailARol(user.email)) {
+                currentRole = emailARol(user.email);
+                currentUserName = user.email.split('@')[0];
+                overlay.style.display = 'none';
                 cloudReady = true;
                 setCloudStatus('ok', t('cloud-ok'));
-            })
-            .catch(err => {
-                console.warn('[Firebase] auth error:', err);
-                setCloudStatus('err', t('cloud-autherr'));
-            });
+            } else {
+                if (user) firebase.auth().signOut(); // cuenta sin rol conocido
+                currentRole = null;
+                currentUserName = null;
+                cloudReady = false;
+                overlay.style.display = 'flex';
+                document.getElementById('loginPass').value = '';
+            }
+            aplicarRolUI();
+        });
     } catch (e) {
         console.warn('[Firebase] init error:', e);
         setCloudStatus('err', t('cloud-initerr'));
@@ -957,9 +1162,11 @@ function renderHistorial() {
         cont.innerHTML = `<div class="hist-empty">${t('hist-empty')}</div>`;
         return;
     }
+    const esSupervisor = currentRole === 'supervisor';
     let html = `<table class="hist-table"><thead><tr>
         <th>Folio</th><th>${t('hist-col-fecha')}</th><th>Inspector</th>
         <th>${t('hist-col-modulo')}</th><th>Lote</th><th>n</th><th>AQL</th><th>Ac/Re</th>
+        ${esSupervisor ? `<th>${t('hist-col-acciones')}</th>` : ''}
     </tr></thead><tbody>`;
     datos.forEach(r => {
         html += `<tr>
@@ -971,10 +1178,65 @@ function renderHistorial() {
             <td>${r.muestra || '-'}</td>
             <td>${r.aql || '-'}</td>
             <td>${r.ac}/${r.re}</td>
+            ${esSupervisor ? `<td style="white-space:nowrap">
+                <button class="hist-btn" title="Corregir" onclick="abrirEdicion('${r.folio}')">✏️</button>
+                <button class="hist-btn" title="Borrar" onclick="borrarReporte('${r.folio}')">🗑️</button>
+            </td>` : ''}
         </tr>`;
     });
     html += '</tbody></table>';
     cont.innerHTML = html;
+}
+
+// ── Corrección y borrado (solo supervisor) ──
+let folioEnEdicion = null;
+
+function abrirEdicion(folio) {
+    if (currentRole !== 'supervisor') return;
+    const r = historialCache.find(x => x.folio === folio);
+    if (!r) return;
+    folioEnEdicion = folio;
+    document.getElementById('editFolio').innerText = folio;
+    document.getElementById('editInspector').value = r.inspector || '';
+    document.getElementById('editModulo').value = r.modulo || '';
+    document.getElementById('editObs').value = r.observaciones || '';
+    document.getElementById('editModal').classList.add('open');
+}
+function cerrarEdicion() {
+    document.getElementById('editModal').classList.remove('open');
+    folioEnEdicion = null;
+}
+
+function guardarEdicion() {
+    if (currentRole !== 'supervisor' || !folioEnEdicion || !db) return;
+    const cambios = {
+        inspector: document.getElementById('editInspector').value.trim(),
+        modulo: document.getElementById('editModulo').value.trim(),
+        observaciones: document.getElementById('editObs').value.trim(),
+        // Rastro de auditoría de la corrección
+        modificadoPor: currentUserName,
+        modificadoEn: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    if (!cambios.inspector || !cambios.modulo) { alert(t('edit-required')); return; }
+    db.collection('reportes').doc(folioEnEdicion).update(cambios)
+        .then(() => {
+            const idx = historialCache.findIndex(x => x.folio === folioEnEdicion);
+            if (idx >= 0) Object.assign(historialCache[idx], cambios);
+            cerrarEdicion();
+            renderHistorial();
+        })
+        .catch(err => { console.warn('[Firestore] editar:', err); alert(t('edit-error')); });
+}
+
+function borrarReporte(folio) {
+    if (currentRole !== 'supervisor' || !db) return;
+    if (!confirm(t('delete-confirm') + '\n\n' + folio)) return;
+    db.collection('reportes').doc(folio).delete()
+        .then(() => {
+            historialCache = historialCache.filter(x => x.folio !== folio);
+            renderHistorial();
+        })
+        .catch(err => { console.warn('[Firestore] borrar:', err); alert(t('delete-error')); });
 }
 
 function exportarCSV() {
