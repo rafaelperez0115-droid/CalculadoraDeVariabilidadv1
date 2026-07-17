@@ -1,0 +1,26 @@
+{
+  "name": "C&S Industries - Calculadora de Variabilidad",
+  "short_name": "C&S Variabilidad",
+  "description": "Calculadora de Muestreo Aleatorio Variable MIL-STD-105E para control de calidad",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f0f2f5",
+  "theme_color": "#003366",
+  "orientation": "portrait-primary",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities"]
+}
