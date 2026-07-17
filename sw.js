@@ -1,6 +1,7 @@
 // Service Worker - C&S Industries Calculadora de Variabilidad
 // Compatible con GitHub Pages en subcarpeta
-const CACHE_NAME = 'cs-variabilidad-v4';
+// v5: network-first para index.html (siempre busca la versión más reciente)
+const CACHE_NAME = 'cs-variabilidad-v5';
 const BASE = self.location.pathname.replace('/sw.js', '');
 
 const ASSETS = [
@@ -33,6 +34,13 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+// ¿Es una petición del index.html o navegación?
+function esIndex(request) {
+  if (request.mode === 'navigate') return true;
+  const url = new URL(request.url);
+  return url.pathname === BASE + '/' || url.pathname === BASE + '/index.html';
+}
+
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   const url = event.request.url;
@@ -42,6 +50,25 @@ self.addEventListener('fetch', (event) => {
       url.includes('identitytoolkit.googleapis.com') ||
       url.includes('securetoken.googleapis.com')) return;
 
+  // NETWORK-FIRST para index.html:
+  // siempre intenta traer la versión más reciente; usa caché solo sin internet.
+  // Así, subir un index.html corregido a GitHub se refleja de inmediato.
+  if (esIndex(event.request)) {
+    event.respondWith(
+      fetch(event.request).then(response => {
+        if (response && response.status === 200) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(c => c.put(event.request, clone));
+        }
+        return response;
+      }).catch(() =>
+        caches.match(event.request).then(c => c || caches.match(BASE + '/index.html'))
+      )
+    );
+    return;
+  }
+
+  // CACHE-FIRST para el resto (iconos, manifest, SDK de Firebase)
   event.respondWith(
     caches.match(event.request).then(cached => {
       if (cached) return cached;
