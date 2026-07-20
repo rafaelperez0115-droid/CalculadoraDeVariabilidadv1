@@ -443,16 +443,28 @@
         .plano-celda {
             aspect-ratio: 1; display: flex; flex-direction: column;
             align-items: center; justify-content: center;
-            background: var(--card-bg); border: 1.5px solid var(--border);
-            border-radius: 6px; cursor: pointer; user-select: none;
-            font-size: 12px; font-weight: bold; color: var(--text);
+            background: linear-gradient(145deg, #e3c69a, #d4b184);
+            border: 1.5px solid #b8935f;
+            border-radius: 4px; cursor: pointer; user-select: none;
+            font-size: 12px; font-weight: bold; color: #5a4327;
             min-height: 42px;
+            box-shadow: inset 0 -3px 0 rgba(0,0,0,0.08);
         }
         .plano-celda .plano-qty { font-size: 9.5px; font-weight: normal; }
         .plano-celda.auditada {
             background: var(--brand); border-color: var(--brand); color: white;
+            box-shadow: inset 0 -3px 0 rgba(0,0,0,0.2);
         }
         .plano-celda.plano-sel { outline: 3px solid #ef6c00; }
+        .plano-paleta-base {
+            display: flex; gap: 10%; justify-content: space-between;
+            background: repeating-linear-gradient(90deg, #8b5a2b 0 14%, #a0693a 14% 16%);
+            border: 1px solid #6f4520; border-radius: 3px;
+            height: 16px; margin-top: 4px; padding: 3px 8%;
+        }
+        .plano-paleta-base span {
+            width: 12%; background: #6f4520; border-radius: 2px;
+        }
         .plano-leyenda { display: flex; gap: 16px; margin-top: 8px; font-size: 11px; color: var(--text-muted); }
         .plano-leyenda .cuadro {
             display: inline-block; width: 11px; height: 11px; border-radius: 3px;
@@ -501,8 +513,9 @@
             #offlineIndicator, .btn-settings, .cloud-status, datalist,
             .plano-controls, .btn-foto, .foto-x, .user-bar { display: none !important; }
             #planoSection { page-break-inside: avoid; }
-            .plano-celda { border: 1px solid #333 !important; color: #000 !important; }
+            .plano-celda { border: 1px solid #8a6a40 !important; background: #e3c69a !important; color: #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             .plano-celda.auditada { background: #003366 !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .plano-paleta-base { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             button { display: none !important; }
             .summary-box, .aseguramiento-box {
                 border: 1px solid #003366;
@@ -698,6 +711,18 @@
             <input type="number" id="cajasFisicas" placeholder="Opcional / Optional">
         </div>
         <div class="form-group">
+            <label id="txt-niveles-label">Niveles de la Paleta:</label>
+            <input type="number" id="nivelesPaleta" min="1" max="10" placeholder="Ej: 3" oninput="autoCalcularCajas()">
+        </div>
+        <div class="form-group">
+            <label id="txt-pornivel-label">Cajas por Nivel:</label>
+            <input type="number" id="cajasPorNivel" min="1" placeholder="Ej: 10" oninput="autoCalcularCajas()">
+        </div>
+        <div class="form-group">
+            <label id="txt-ultimo-label">Cajas en Último Nivel:</label>
+            <input type="number" id="cajasUltimoNivel" min="0" placeholder="Opcional / Optional" oninput="autoCalcularCajas()">
+        </div>
+        <div class="form-group">
             <label id="txt-cap-label">Capacidad Máx. Caja:</label>
             <input type="number" id="unidadesPorCaja" placeholder="Opcional / Optional">
         </div>
@@ -784,11 +809,6 @@
     <div id="planoSection" style="display:none;">
         <h3 id="txt-plano-title">🗺️ Plano de Paleta por Niveles</h3>
         <div class="plano-controls">
-            <label id="txt-plano-niveles">Niveles:</label>
-            <select id="planoNiveles" onchange="cambiarNivelesPlano()">
-                <option>1</option><option>2</option><option selected>3</option>
-                <option>4</option><option>5</option><option>6</option>
-            </select>
             <label id="txt-plano-cols">Cajas por fila:</label>
             <select id="planoCols" onchange="cambiarColsPlano()">
                 <option>2</option><option>3</option><option>4</option><option>5</option>
@@ -903,6 +923,9 @@ const TEXTS = {
         'alert-fotos-max':    'Máximo 3 fotos por inspección.',
         'alert-foto-grande':  'Las fotos exceden el espacio disponible del reporte. Quite alguna e intente de nuevo.',
         'alert-foto-error':   'No se pudo procesar la foto.',
+        'txt-niveles-label':  'Niveles de la Paleta:',
+        'txt-pornivel-label': 'Cajas por Nivel:',
+        'txt-ultimo-label':   'Cajas en Último Nivel:',
         'txt-plano-title':    '🗺️ Plano de Paleta por Niveles',
         'txt-plano-niveles':  'Niveles:',
         'txt-plano-cols':     'Cajas por fila:',
@@ -1014,6 +1037,9 @@ const TEXTS = {
         'alert-fotos-max':    'Maximum 3 photos per inspection.',
         'alert-foto-grande':  'Photos exceed the report storage space. Remove one and try again.',
         'alert-foto-error':   'Could not process the photo.',
+        'txt-niveles-label':  'Pallet Levels:',
+        'txt-pornivel-label': 'Boxes per Level:',
+        'txt-ultimo-label':   'Boxes on Last Level:',
         'txt-plano-title':    '🗺️ Pallet Layout by Levels',
         'txt-plano-niveles':  'Levels:',
         'txt-plano-cols':     'Boxes per row:',
@@ -1072,7 +1098,8 @@ function applyTexts() {
         'txt-edit-title','txt-edit-modulo','txt-edit-obs','btnGuardarEdicion',
         'txt-codigo-label','txt-codigo-rep','txt-edit-codigo',
         'txt-fotos-label','btnFoto','txt-plano-title','txt-plano-cols','txt-plano-hint',
-        'txt-plano-niveles','txt-leyenda-aud','txt-leyenda-nor','txt-detalle-title'
+        'txt-niveles-label','txt-pornivel-label','txt-ultimo-label',
+        'txt-leyenda-aud','txt-leyenda-nor','txt-detalle-title'
     ];
     ids.forEach(id => {
         const el = document.getElementById(id);
@@ -1274,6 +1301,9 @@ function aplicarRolUI() {
                 document.getElementById('moduloArea').value = '';
                 document.getElementById('observaciones').value = '';
                 document.getElementById('codigoProducto').value = '';
+                document.getElementById('nivelesPaleta').value = '';
+                document.getElementById('cajasPorNivel').value = '';
+                document.getElementById('cajasUltimoNivel').value = '';
                 fotosCapturadas = [];
                 if (typeof renderThumbs === 'function') renderThumbs();
                 planoActual = null;
@@ -1607,34 +1637,50 @@ function renderThumbs() {
 
 // ══════════════════════════════════════════════════════
 //  Plano de paleta por niveles
-//  Nivel 1 = base de la paleta; el último = nivel superior.
-//  Las cajas se numeran igual que el random de la calculadora.
+//  La estructura (niveles, cajas por nivel, último nivel) se
+//  define ANTES de generar. Nivel 1 = base; el último puede
+//  llevar menos cajas. Numeración = la del random.
 // ══════════════════════════════════════════════════════
 let planoActual = null;
-let planoSeleccion = null; // celda seleccionada para intercambio {nivel, idx}
+let planoSeleccion = null; // celda seleccionada para intercambio
 
-function crearPlano(totalCajas, auditadas) {
-    const nivelesDefault = totalCajas >= 3 ? 3 : 1;
-    const cajasPorNivel = Math.ceil(totalCajas / nivelesDefault);
-    const cols = Math.min(8, Math.max(2, Math.ceil(Math.sqrt(cajasPorNivel))));
+// Al llenar niveles/cajas por nivel, el total de cajas se calcula solo
+function autoCalcularCajas() {
+    const niveles = parseInt(document.getElementById('nivelesPaleta').value) || 0;
+    const porNivel = parseInt(document.getElementById('cajasPorNivel').value) || 0;
+    const ultimoIn = document.getElementById('cajasUltimoNivel').value;
+    if (niveles < 1 || porNivel < 1) return;
+    const ultimo = ultimoIn === '' ? porNivel : (parseInt(ultimoIn) || 0);
+    const total = porNivel * (niveles - 1) + ultimo;
+    if (total > 0) document.getElementById('cajasFisicas').value = total;
+}
+
+function crearPlano(totalCajas, auditadas, porNivel) {
+    // Si no definieron estructura, dividir en 3 niveles por defecto
+    if (!porNivel || porNivel < 1) {
+        const nivelesDefault = totalCajas >= 3 ? 3 : 1;
+        porNivel = Math.ceil(totalCajas / nivelesDefault);
+    }
+    const cols = Math.min(8, Math.max(2, Math.ceil(Math.sqrt(porNivel))));
     planoActual = {
-        niveles: nivelesDefault,
+        porNivel: porNivel,
         cols: cols,
         orden: Array.from({ length: totalCajas }, (_, i) => i + 1),
         auditadas: auditadas
     };
-    document.getElementById('planoNiveles').value = nivelesDefault;
     document.getElementById('planoCols').value = cols;
     document.getElementById('planoSection').style.display = 'block';
     renderPlano(document.getElementById('planoGrid'), planoActual, true);
 }
 
 function renderPlano(cont, plano, interactivo) {
-    const niveles = plano.niveles || 1;
     const total = plano.orden.length;
-    const porNivel = Math.ceil(total / niveles);
+    // Compatibilidad con reportes viejos que guardaban 'niveles'
+    const porNivel = plano.porNivel || Math.ceil(total / (plano.niveles || 1));
+    const niveles = Math.ceil(total / porNivel);
     let html = '';
-    // El nivel superior se dibuja primero (como se ve la paleta de frente)
+    // El nivel superior se dibuja primero (como se ve la paleta de frente);
+    // si el último nivel lleva menos cajas, queda arriba automáticamente
     for (let nv = niveles - 1; nv >= 0; nv--) {
         const inicio = nv * porNivel;
         const cajas = plano.orden.slice(inicio, inicio + porNivel);
@@ -1658,6 +1704,8 @@ function renderPlano(cont, plano, interactivo) {
             }).join('') +
             `</div></div>`;
     }
+    // Base de madera de la paleta
+    html += `<div class="plano-paleta-base"><span></span><span></span><span></span></div>`;
     cont.innerHTML = html;
 }
 
@@ -1685,14 +1733,6 @@ function tocarCelda(idx) {
 function cambiarColsPlano() {
     if (!planoActual) return;
     planoActual.cols = parseInt(document.getElementById('planoCols').value);
-    planoSeleccion = null;
-    renderPlano(document.getElementById('planoGrid'), planoActual, true);
-    actualizarPlanoEnNube();
-}
-
-function cambiarNivelesPlano() {
-    if (!planoActual) return;
-    planoActual.niveles = parseInt(document.getElementById('planoNiveles').value);
     planoSeleccion = null;
     renderPlano(document.getElementById('planoGrid'), planoActual, true);
     actualizarPlanoEnNube();
@@ -1829,13 +1869,14 @@ function ejecutarAuditoria() {
     }
     actualizarNotaAseguramiento();
 
-    // ── Plano de ubicación de paletas ──
+    // ── Plano de paleta por niveles ──
     folioActual = folio;
     planoSeleccion = null;
     if (totalCajas > 0) {
         const auditadasMap = {};
         distribucionReporte.forEach(d => { if (d.caja > 0) auditadasMap[d.caja] = d.cantidad; });
-        crearPlano(totalCajas, auditadasMap);
+        const porNivelForm = parseInt(document.getElementById('cajasPorNivel').value) || 0;
+        crearPlano(totalCajas, auditadasMap, porNivelForm);
     } else {
         planoActual = null;
         document.getElementById('planoSection').style.display = 'none';
