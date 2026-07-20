@@ -386,8 +386,91 @@
         }
         .hist-btn:hover { transform: scale(1.2); }
 
+        /* ── Fotos de paletas ── */
+        .fotos-box {
+            border: 1px dashed var(--border); border-radius: 8px;
+            padding: 10px 12px; margin: 12px 0;
+        }
+        .fotos-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .fotos-head span { font-size: 12.5px; font-weight: bold; color: var(--text); }
+        .btn-foto {
+            background: var(--brand); color: white; border: none;
+            padding: 7px 12px; border-radius: 6px; font-size: 12px;
+            font-weight: bold; cursor: pointer; white-space: nowrap;
+        }
+        .btn-foto:hover { background: var(--brand-hover); }
+        .fotos-thumbs { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+        .foto-thumb { position: relative; width: 84px; height: 84px; }
+        .foto-thumb img {
+            width: 100%; height: 100%; object-fit: cover;
+            border-radius: 6px; border: 1px solid var(--border);
+        }
+        .foto-thumb .foto-x {
+            position: absolute; top: -6px; right: -6px;
+            background: #c62828; color: white; border: none; border-radius: 50%;
+            width: 20px; height: 20px; font-size: 11px; cursor: pointer; line-height: 1;
+        }
+
+        /* ── Plano de paletas ── */
+        #planoSection { margin-top: 18px; }
+        #planoSection h3 { font-size: 14px; color: var(--brand); margin-bottom: 8px; }
+        .plano-controls {
+            display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+            margin-bottom: 10px; font-size: 12px;
+        }
+        .plano-controls label { font-size: 12px; font-weight: bold; margin: 0; }
+        .plano-controls select { width: auto; padding: 5px 8px; font-size: 12px; }
+        .plano-hint { font-size: 11px; color: var(--text-muted); }
+        .plano-grid {
+            display: grid; gap: 5px;
+            background: var(--th-bg); border: 1px solid var(--border);
+            border-radius: 8px; padding: 8px;
+        }
+        .plano-nivel { margin-bottom: 12px; }
+        .plano-nivel-titulo {
+            font-size: 12px; font-weight: bold; color: var(--text);
+            margin-bottom: 5px; display: flex; align-items: center; gap: 6px;
+        }
+        .plano-nivel-titulo .nivel-tag {
+            background: var(--brand); color: white; border-radius: 4px;
+            padding: 1px 8px; font-size: 11px;
+        }
+        .foto-nivel-tag {
+            position: absolute; bottom: -2px; left: 0; right: 0;
+            background: rgba(0,51,102,0.85); color: white; font-size: 9.5px;
+            text-align: center; border-radius: 0 0 6px 6px; padding: 2px 0;
+        }
+        .plano-celda {
+            aspect-ratio: 1; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            background: var(--card-bg); border: 1.5px solid var(--border);
+            border-radius: 6px; cursor: pointer; user-select: none;
+            font-size: 12px; font-weight: bold; color: var(--text);
+            min-height: 42px;
+        }
+        .plano-celda .plano-qty { font-size: 9.5px; font-weight: normal; }
+        .plano-celda.auditada {
+            background: var(--brand); border-color: var(--brand); color: white;
+        }
+        .plano-celda.plano-sel { outline: 3px solid #ef6c00; }
+        .plano-leyenda { display: flex; gap: 16px; margin-top: 8px; font-size: 11px; color: var(--text-muted); }
+        .plano-leyenda .cuadro {
+            display: inline-block; width: 11px; height: 11px; border-radius: 3px;
+            margin-right: 4px; vertical-align: middle; border: 1px solid var(--border);
+        }
+        .plano-leyenda .cuadro.aud { background: var(--brand); border-color: var(--brand); }
+
+        /* ── Detalle de reporte ── */
+        .det-campo { font-size: 12.5px; margin-bottom: 4px; }
+        .det-campo strong { color: var(--brand); }
+        .det-fotos { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+        .det-fotos img {
+            width: 130px; height: 130px; object-fit: cover;
+            border-radius: 6px; border: 1px solid var(--border); cursor: pointer;
+        }
+
         .modal-wide { max-width: 620px; max-height: 85vh; overflow-y: auto; }
-        .hist-filters { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+        .hist-filters { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
         .hist-filters input { font-size: 12px; padding: 8px; }
         .hist-table { width: 100%; border-collapse: collapse; display: table; margin-top: 5px; }
         .hist-table th, .hist-table td { border: 1px solid var(--border); padding: 6px; font-size: 11.5px; text-align: center; }
@@ -415,7 +498,11 @@
             .container { box-shadow: none; border: none; max-width: 100%; }
             .form-grid, .button-group, .subtitle, .tech-subtitle,
             label, input, select, .modal-overlay, #installBanner,
-            #offlineIndicator, .btn-settings, .cloud-status, datalist { display: none !important; }
+            #offlineIndicator, .btn-settings, .cloud-status, datalist,
+            .plano-controls, .btn-foto, .foto-x, .user-bar { display: none !important; }
+            #planoSection { page-break-inside: avoid; }
+            .plano-celda { border: 1px solid #333 !important; color: #000 !important; }
+            .plano-celda.auditada { background: #003366 !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             button { display: none !important; }
             .summary-box, .aseguramiento-box {
                 border: 1px solid #003366;
@@ -472,6 +559,7 @@
         <div class="hist-filters">
             <input type="text" id="filtroInspector" placeholder="Inspector..." oninput="renderHistorial()">
             <input type="text" id="filtroModulo" placeholder="Módulo..." oninput="renderHistorial()">
+            <input type="text" id="filtroCodigo" placeholder="Código..." oninput="renderHistorial()">
             <input type="date" id="filtroFecha" onchange="renderHistorial()">
         </div>
         <div id="histContenido"><div class="hist-empty" id="histEmpty">Cargando...</div></div>
@@ -509,11 +597,26 @@
             <label id="txt-edit-modulo">Módulo / Área:</label>
             <input type="text" id="editModulo" maxlength="40">
         </div>
+        <div class="form-group" style="margin-bottom:10px;">
+            <label id="txt-edit-codigo">Código de Producto:</label>
+            <input type="text" id="editCodigo" maxlength="40" style="text-transform:uppercase;">
+        </div>
         <div class="form-group" style="margin-bottom:14px;">
             <label id="txt-edit-obs">Observaciones:</label>
             <input type="text" id="editObs" maxlength="200">
         </div>
         <button class="btn-csv" style="width:100%;margin:0;" id="btnGuardarEdicion" onclick="guardarEdicion()">💾 Guardar Cambios</button>
+    </div>
+</div>
+
+<!-- Modal de detalle de reporte -->
+<div class="modal-overlay" id="detalleModal" onclick="if(event.target===this)cerrarDetalle()">
+    <div class="modal modal-wide">
+        <div class="modal-header">
+            <h2 id="txt-detalle-title">🔎 Detalle de Inspección</h2>
+            <button class="modal-close" onclick="cerrarDetalle()">✕</button>
+        </div>
+        <div id="detalleContenido"></div>
     </div>
 </div>
 
@@ -614,6 +717,10 @@
                 <option value="Producto Terminado"></option>
             </datalist>
         </div>
+        <div class="form-group">
+            <label id="txt-codigo-label">Código de Producto:</label>
+            <input type="text" id="codigoProducto" placeholder="Ej: PT-4520" maxlength="40" style="text-transform:uppercase;">
+        </div>
         <div class="form-group full-width">
             <label id="txt-obs-label">Observaciones (opcional):</label>
             <input type="text" id="observaciones" placeholder="Opcional / Optional" maxlength="200">
@@ -623,6 +730,15 @@
     <div id="aseguramientoNota" class="aseguramiento-box">
         <div id="percVal" class="porcentaje-badge">0%</div>
         <div id="percText"></div>
+    </div>
+
+    <div class="fotos-box">
+        <div class="fotos-head">
+            <span id="txt-fotos-label">📷 Fotos de Paletas (máx. 3):</span>
+            <button class="btn-foto" id="btnFoto" onclick="document.getElementById('fotoInput').click()">Agregar Foto</button>
+        </div>
+        <input type="file" id="fotoInput" accept="image/*" capture="environment" style="display:none" onchange="agregarFotos(this.files); this.value='';">
+        <div class="fotos-thumbs" id="fotosThumbs"></div>
     </div>
 
     <div class="button-group">
@@ -640,6 +756,7 @@
         <strong id="txt-strategy">Estrategia de Inspección:</strong><br>
         <span id="txt-folio">• Folio:</span> <strong id="folioReporte">-</strong><br>
         <span id="txt-inspector-rep">• Inspector:</span> <span id="inspectorReporte">-</span> | <span id="txt-modulo-rep">Módulo:</span> <span id="moduloReporte">-</span><br>
+        <span id="txt-codigo-rep">• Código de Producto:</span> <strong id="codigoReporte">-</strong><br>
         <span id="txt-fecha-rep">• Fecha/Hora:</span> <span id="fechaReporte">-</span><br>
         <span id="txt-lot-size">• Tamaño de Lote:</span> <span id="loteReporte">-</span> <span id="txt-units">unidades</span>.<br>
         <span id="txt-sample-size">• Tamaño de Muestra (n):</span> <span id="nMuestra" style="font-weight:bold">0</span><br>
@@ -663,6 +780,28 @@
             </tr>
         </tfoot>
     </table>
+
+    <div id="planoSection" style="display:none;">
+        <h3 id="txt-plano-title">🗺️ Plano de Paleta por Niveles</h3>
+        <div class="plano-controls">
+            <label id="txt-plano-niveles">Niveles:</label>
+            <select id="planoNiveles" onchange="cambiarNivelesPlano()">
+                <option>1</option><option>2</option><option selected>3</option>
+                <option>4</option><option>5</option><option>6</option>
+            </select>
+            <label id="txt-plano-cols">Cajas por fila:</label>
+            <select id="planoCols" onchange="cambiarColsPlano()">
+                <option>2</option><option>3</option><option>4</option><option>5</option>
+                <option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
+            </select>
+            <span class="plano-hint" id="txt-plano-hint">Toca dos cajas para intercambiar su posición</span>
+        </div>
+        <div id="planoGrid"></div>
+        <div class="plano-leyenda">
+            <span><span class="cuadro aud"></span><span id="txt-leyenda-aud">Caja a inspeccionar (cantidad)</span></span>
+            <span><span class="cuadro"></span><span id="txt-leyenda-nor">Caja sin inspección</span></span>
+        </div>
+    </div>
 
     <p id="txt-author" style="margin-top: 22px; text-align: center; font-size: 11.5px; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 14px;"></p>
 </div>
@@ -754,6 +893,31 @@ const TEXTS = {
         'hist-col-fecha':     'Fecha/Hora',
         'hist-col-modulo':    'Módulo',
         'hist-col-acciones':  'Acciones',
+        'hist-col-codigo':    'Código',
+        'txt-codigo-label':   'Código de Producto:',
+        'txt-codigo-rep':     '• Código de Producto:',
+        'txt-edit-codigo':    'Código de Producto:',
+        'alert-codigo':       'Ingrese el código del producto.',
+        'txt-fotos-label':    '📷 Fotos de la Paleta por Nivel (máx. 3):',
+        'btnFoto':            'Agregar Foto',
+        'alert-fotos-max':    'Máximo 3 fotos por inspección.',
+        'alert-foto-grande':  'Las fotos exceden el espacio disponible del reporte. Quite alguna e intente de nuevo.',
+        'alert-foto-error':   'No se pudo procesar la foto.',
+        'txt-plano-title':    '🗺️ Plano de Paleta por Niveles',
+        'txt-plano-niveles':  'Niveles:',
+        'txt-plano-cols':     'Cajas por fila:',
+        'txt-plano-hint':     'Toca dos cajas para intercambiar su posición',
+        'plano-nivel':        'Nivel',
+        'plano-base':         '(base de la paleta)',
+        'plano-superior':     '(nivel superior)',
+        'txt-leyenda-aud':    'Caja a inspeccionar (cantidad)',
+        'txt-leyenda-nor':    'Caja sin inspección',
+        'txt-detalle-title':  '🔎 Detalle de Inspección',
+        'det-fotos':          'Fotos de Paletas',
+        'det-sin-fotos':      'Sin fotos adjuntas.',
+        'det-cargando':       'Cargando fotos...',
+        'det-error-fotos':    'No se pudieron cargar las fotos.',
+        'det-modificado':     'Corregido por',
         'txt-login-sub':      'Calculadora de Variabilidad — Inicio de Sesión',
         'btnLogin':           'Entrar',
         'btnLogout':          'Cerrar sesión',
@@ -840,6 +1004,31 @@ const TEXTS = {
         'hist-col-fecha':     'Date/Time',
         'hist-col-modulo':    'Module',
         'hist-col-acciones':  'Actions',
+        'hist-col-codigo':    'Code',
+        'txt-codigo-label':   'Product Code:',
+        'txt-codigo-rep':     '• Product Code:',
+        'txt-edit-codigo':    'Product Code:',
+        'alert-codigo':       'Enter the product code.',
+        'txt-fotos-label':    '📷 Pallet Photos by Level (max. 3):',
+        'btnFoto':            'Add Photo',
+        'alert-fotos-max':    'Maximum 3 photos per inspection.',
+        'alert-foto-grande':  'Photos exceed the report storage space. Remove one and try again.',
+        'alert-foto-error':   'Could not process the photo.',
+        'txt-plano-title':    '🗺️ Pallet Layout by Levels',
+        'txt-plano-niveles':  'Levels:',
+        'txt-plano-cols':     'Boxes per row:',
+        'txt-plano-hint':     'Tap two boxes to swap their position',
+        'plano-nivel':        'Level',
+        'plano-base':         '(pallet base)',
+        'plano-superior':     '(top level)',
+        'txt-leyenda-aud':    'Box to inspect (quantity)',
+        'txt-leyenda-nor':    'Box not inspected',
+        'txt-detalle-title':  '🔎 Inspection Detail',
+        'det-fotos':          'Pallet Photos',
+        'det-sin-fotos':      'No photos attached.',
+        'det-cargando':       'Loading photos...',
+        'det-error-fotos':    'Could not load photos.',
+        'det-modificado':     'Corrected by',
         'txt-login-sub':      'Variability Calculator — Sign In',
         'btnLogin':           'Sign In',
         'btnLogout':          'Sign out',
@@ -880,7 +1069,10 @@ function applyTexts() {
         'txt-folio','txt-inspector-rep','txt-modulo-rep','txt-fecha-rep',
         'btnHistorial','txt-hist-title','btnCsv',
         'txt-login-sub','btnLogin','btnLogout',
-        'txt-edit-title','txt-edit-modulo','txt-edit-obs','btnGuardarEdicion'
+        'txt-edit-title','txt-edit-modulo','txt-edit-obs','btnGuardarEdicion',
+        'txt-codigo-label','txt-codigo-rep','txt-edit-codigo',
+        'txt-fotos-label','btnFoto','txt-plano-title','txt-plano-cols','txt-plano-hint',
+        'txt-plano-niveles','txt-leyenda-aud','txt-leyenda-nor','txt-detalle-title'
     ];
     ids.forEach(id => {
         const el = document.getElementById(id);
@@ -926,7 +1118,7 @@ function closeSettings() {
 function closeSettingsOnOverlay(e) {
     if (e.target === document.getElementById('settingsModal')) closeSettings();
 }
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeSettings(); if (typeof cerrarHistorial === 'function') cerrarHistorial(); if (typeof cerrarEdicion === 'function') cerrarEdicion(); } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeSettings(); if (typeof cerrarHistorial === 'function') cerrarHistorial(); if (typeof cerrarEdicion === 'function') cerrarEdicion(); if (typeof cerrarDetalle === 'function') cerrarDetalle(); } });
 
 // ══════════════════════════════════════════════════════
 //  Banner instalación PWA
@@ -1077,6 +1269,16 @@ function aplicarRolUI() {
                 cloudReady = false;
                 overlay.style.display = 'flex';
                 document.getElementById('loginPass').value = '';
+                // Limpiar datos del inspector anterior al cerrar sesión
+                document.getElementById('inspectorNombre').value = '';
+                document.getElementById('moduloArea').value = '';
+                document.getElementById('observaciones').value = '';
+                document.getElementById('codigoProducto').value = '';
+                fotosCapturadas = [];
+                if (typeof renderThumbs === 'function') renderThumbs();
+                planoActual = null;
+                folioActual = null;
+                document.getElementById('planoSection').style.display = 'none';
             }
             aplicarRolUI();
         });
@@ -1108,6 +1310,16 @@ function guardarReporte(reporte) {
             console.warn('[Firestore] error:', err);
             setCloudStatus('err', t('cloud-saveerr'));
         });
+    // Las fotos van en una colección aparte para que el historial cargue rápido
+    if (fotosCapturadas.length > 0) {
+        db.collection('fotos').doc(reporte.folio).set({
+            folio: reporte.folio,
+            imagenes: fotosCapturadas.slice(),
+            creadoEn: firebase.firestore.FieldValue.serverTimestamp()
+        }).catch(err => console.warn('[Firestore] fotos:', err));
+        fotosCapturadas = [];
+        renderThumbs();
+    }
     // Con persistencia offline activada, si no hay internet el .set()
     // queda pendiente y se sincroniza automáticamente al reconectar
     if (!navigator.onLine) {
@@ -1147,10 +1359,12 @@ function cerrarHistorial() {
 function filtrarHistorial() {
     const fi = document.getElementById('filtroInspector').value.trim().toLowerCase();
     const fm = document.getElementById('filtroModulo').value.trim().toLowerCase();
+    const fc = document.getElementById('filtroCodigo').value.trim().toLowerCase();
     const ff = document.getElementById('filtroFecha').value; // YYYY-MM-DD
     return historialCache.filter(r => {
         if (fi && !(r.inspector || '').toLowerCase().includes(fi)) return false;
         if (fm && !(r.modulo || '').toLowerCase().includes(fm)) return false;
+        if (fc && !(r.codigoProducto || '').toLowerCase().includes(fc)) return false;
         if (ff && (r.fechaLocal || '').substring(0, 10) !== ff) return false;
         return true;
     });
@@ -1166,8 +1380,8 @@ function renderHistorial() {
     const esSupervisor = currentRole === 'supervisor';
     let html = `<table class="hist-table"><thead><tr>
         <th>Folio</th><th>${t('hist-col-fecha')}</th><th>Inspector</th>
-        <th>${t('hist-col-modulo')}</th><th>Lote</th><th>n</th><th>AQL</th><th>Ac/Re</th>
-        ${esSupervisor ? `<th>${t('hist-col-acciones')}</th>` : ''}
+        <th>${t('hist-col-modulo')}</th><th>${t('hist-col-codigo')}</th><th>Lote</th><th>n</th><th>AQL</th><th>Ac/Re</th>
+        <th>${t('hist-col-acciones')}</th>
     </tr></thead><tbody>`;
     datos.forEach(r => {
         html += `<tr>
@@ -1175,18 +1389,89 @@ function renderHistorial() {
             <td>${(r.fechaLocal || '').substring(0, 16).replace('T', ' ')}</td>
             <td>${r.inspector || '-'}</td>
             <td>${r.modulo || '-'}</td>
+            <td>${r.codigoProducto || '-'}</td>
             <td>${(r.lote || 0).toLocaleString()}</td>
             <td>${r.muestra || '-'}</td>
             <td>${r.aql || '-'}</td>
             <td>${r.ac}/${r.re}</td>
-            ${esSupervisor ? `<td style="white-space:nowrap">
+            <td style="white-space:nowrap">
+                <button class="hist-btn" title="Ver" onclick="verDetalle('${r.folio}')">👁️</button>
+                ${esSupervisor ? `
                 <button class="hist-btn" title="Corregir" onclick="abrirEdicion('${r.folio}')">✏️</button>
-                <button class="hist-btn" title="Borrar" onclick="borrarReporte('${r.folio}')">🗑️</button>
-            </td>` : ''}
+                <button class="hist-btn" title="Borrar" onclick="borrarReporte('${r.folio}')">🗑️</button>` : ''}
+            </td>
         </tr>`;
     });
     html += '</tbody></table>';
     cont.innerHTML = html;
+}
+
+// ── Detalle de reporte (fotos + plano) ──
+function verDetalle(folio) {
+    const r = historialCache.find(x => x.folio === folio);
+    if (!r) return;
+    const cont = document.getElementById('detalleContenido');
+    const campos = [
+        ['Folio', r.folio],
+        [t('hist-col-fecha'), (r.fechaLocal || '').replace('T', ' ')],
+        ['Inspector', r.inspector],
+        [t('hist-col-modulo'), r.modulo],
+        [t('txt-codigo-label').replace(':',''), r.codigoProducto || '-'],
+        ['Lote', (r.lote || 0).toLocaleString()],
+        ['AQL', r.aql + ' | ' + (r.letra || '-') + ' | n=' + r.muestra + ' | Ac/Re: ' + r.ac + '/' + r.re],
+        [t('txt-obs-label').replace(' (opcional):',''), r.observaciones || '-']
+    ];
+    if (r.modificadoPor) campos.push([t('det-modificado'), r.modificadoPor]);
+    let html = campos.map(c => `<div class="det-campo"><strong>${c[0]}:</strong> ${c[1]}</div>`).join('');
+    if (r.plano && r.plano.orden) {
+        html += `<h3 style="font-size:13px;color:var(--brand);margin:12px 0 6px;">${t('txt-plano-title')}</h3>`;
+        html += `<div id="detallePlano"></div>`;
+    }
+    html += `<h3 style="font-size:13px;color:var(--brand);margin:12px 0 6px;">📷 ${t('det-fotos')}</h3>`;
+    html += `<div class="det-fotos" id="detalleFotos">` +
+        ((r.fotosCount || 0) > 0 ? `<span style="font-size:12px;color:var(--text-muted)">${t('det-cargando')}</span>`
+                                 : `<span style="font-size:12px;color:var(--text-muted)">${t('det-sin-fotos')}</span>`) +
+        `</div>`;
+    cont.innerHTML = html;
+    if (r.plano && r.plano.orden) {
+        renderPlano(document.getElementById('detallePlano'), r.plano, false);
+    }
+    document.getElementById('detalleModal').classList.add('open');
+    if ((r.fotosCount || 0) > 0 && db) {
+        db.collection('fotos').doc(folio).get()
+            .then(doc => {
+                const cf = document.getElementById('detalleFotos');
+                if (doc.exists && doc.data().imagenes) {
+                    detalleFotosCache = doc.data().imagenes;
+                    cf.innerHTML = detalleFotosCache.map((img, i) =>
+                        `<div class="foto-thumb" style="width:130px;height:130px;">` +
+                        `<img src="${img}" onclick="ampliarFoto(${i})" title="Ampliar" style="width:100%;height:100%;object-fit:cover;border-radius:6px;border:1px solid var(--border);cursor:pointer;">` +
+                        `<span class="foto-nivel-tag">${t('plano-nivel')} ${i+1}</span></div>`
+                    ).join('');
+                } else {
+                    cf.innerHTML = `<span style="font-size:12px;color:var(--text-muted)">${t('det-sin-fotos')}</span>`;
+                }
+            })
+            .catch(() => {
+                document.getElementById('detalleFotos').innerHTML =
+                    `<span style="font-size:12px;color:var(--text-muted)">${t('det-error-fotos')}</span>`;
+            });
+    }
+}
+function cerrarDetalle() {
+    document.getElementById('detalleModal').classList.remove('open');
+}
+
+// Visor de foto ampliada
+let detalleFotosCache = [];
+function ampliarFoto(i) {
+    const img = detalleFotosCache[i];
+    if (!img) return;
+    const visor = document.createElement('div');
+    visor.style.cssText = 'position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.9);display:flex;align-items:center;justify-content:center;cursor:zoom-out;padding:16px;';
+    visor.innerHTML = `<img src="${img}" style="max-width:100%;max-height:100%;border-radius:8px;">`;
+    visor.onclick = () => visor.remove();
+    document.body.appendChild(visor);
 }
 
 // ── Corrección y borrado (solo supervisor) ──
@@ -1200,6 +1485,7 @@ function abrirEdicion(folio) {
     document.getElementById('editFolio').innerText = folio;
     document.getElementById('editInspector').value = r.inspector || '';
     document.getElementById('editModulo').value = r.modulo || '';
+    document.getElementById('editCodigo').value = r.codigoProducto || '';
     document.getElementById('editObs').value = r.observaciones || '';
     document.getElementById('editModal').classList.add('open');
 }
@@ -1213,6 +1499,7 @@ function guardarEdicion() {
     const cambios = {
         inspector: document.getElementById('editInspector').value.trim(),
         modulo: document.getElementById('editModulo').value.trim(),
+        codigoProducto: document.getElementById('editCodigo').value.trim().toUpperCase(),
         observaciones: document.getElementById('editObs').value.trim(),
         // Rastro de auditoría de la corrección
         modificadoPor: currentUserName,
@@ -1234,6 +1521,8 @@ function borrarReporte(folio) {
     if (!confirm(t('delete-confirm') + '\n\n' + folio)) return;
     db.collection('reportes').doc(folio).delete()
         .then(() => {
+            // Borrar también las fotos asociadas
+            db.collection('fotos').doc(folio).delete().catch(() => {});
             historialCache = historialCache.filter(x => x.folio !== folio);
             renderHistorial();
         })
@@ -1243,10 +1532,10 @@ function borrarReporte(folio) {
 function exportarCSV() {
     const datos = filtrarHistorial();
     if (!datos.length) { alert(t('hist-empty')); return; }
-    const cab = ['Folio','FechaHora','Inspector','Modulo','Lote','LetraCodigo','Nivel','AQL','Muestra_n','Ac','Re','Observaciones'];
+    const cab = ['Folio','FechaHora','Inspector','Modulo','CodigoProducto','Lote','LetraCodigo','Nivel','AQL','Muestra_n','Ac','Re','Observaciones'];
     const filas = datos.map(r => [
         r.folio, (r.fechaLocal || '').replace('T', ' '), r.inspector, r.modulo,
-        r.lote, r.letra, r.nivel, r.aql, r.muestra, r.ac, r.re,
+        r.codigoProducto || '', r.lote, r.letra, r.nivel, r.aql, r.muestra, r.ac, r.re,
         '"' + String(r.observaciones || '').replace(/"/g, '""') + '"'
     ].join(','));
     const csv = '\uFEFF' + cab.join(',') + '\n' + filas.join('\n');
@@ -1256,6 +1545,165 @@ function exportarCSV() {
     a.download = 'reportes_inspeccion_' + new Date().toISOString().substring(0, 10) + '.csv';
     a.click();
     URL.revokeObjectURL(a.href);
+}
+
+// ══════════════════════════════════════════════════════
+//  Fotos de paletas (comprimidas, guardadas en Firestore)
+// ══════════════════════════════════════════════════════
+const MAX_FOTOS = 3;
+const MAX_TOTAL_CHARS = 700000; // límite seguro bajo 1MB por documento
+let fotosCapturadas = [];
+
+function comprimirImagen(file, maxDim, calidad) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = () => {
+            URL.revokeObjectURL(url);
+            let w = img.width, h = img.height;
+            if (w > h && w > maxDim) { h = Math.round(h * maxDim / w); w = maxDim; }
+            else if (h >= w && h > maxDim) { w = Math.round(w * maxDim / h); h = maxDim; }
+            const canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL('image/jpeg', calidad));
+        };
+        img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('img')); };
+        img.src = url;
+    });
+}
+
+async function agregarFotos(files) {
+    for (const file of files) {
+        if (fotosCapturadas.length >= MAX_FOTOS) { alert(t('alert-fotos-max')); break; }
+        try {
+            let dataUrl = await comprimirImagen(file, 900, 0.6);
+            // Si quedó muy pesada, comprimir más
+            if (dataUrl.length > 250000) dataUrl = await comprimirImagen(file, 700, 0.45);
+            const total = fotosCapturadas.reduce((s, f) => s + f.length, 0) + dataUrl.length;
+            if (total > MAX_TOTAL_CHARS) { alert(t('alert-foto-grande')); continue; }
+            fotosCapturadas.push(dataUrl);
+        } catch (e) {
+            console.warn('[Fotos]', e);
+            alert(t('alert-foto-error'));
+        }
+    }
+    renderThumbs();
+}
+
+function quitarFoto(i) {
+    fotosCapturadas.splice(i, 1);
+    renderThumbs();
+}
+
+function renderThumbs() {
+    const cont = document.getElementById('fotosThumbs');
+    cont.innerHTML = fotosCapturadas.map((f, i) =>
+        `<div class="foto-thumb"><img src="${f}" alt="Foto ${i+1}">` +
+        `<span class="foto-nivel-tag">${t('plano-nivel')} ${i+1}</span>` +
+        `<button class="foto-x" onclick="quitarFoto(${i})" title="Quitar">✕</button></div>`
+    ).join('');
+}
+
+// ══════════════════════════════════════════════════════
+//  Plano de paleta por niveles
+//  Nivel 1 = base de la paleta; el último = nivel superior.
+//  Las cajas se numeran igual que el random de la calculadora.
+// ══════════════════════════════════════════════════════
+let planoActual = null;
+let planoSeleccion = null; // celda seleccionada para intercambio {nivel, idx}
+
+function crearPlano(totalCajas, auditadas) {
+    const nivelesDefault = totalCajas >= 3 ? 3 : 1;
+    const cajasPorNivel = Math.ceil(totalCajas / nivelesDefault);
+    const cols = Math.min(8, Math.max(2, Math.ceil(Math.sqrt(cajasPorNivel))));
+    planoActual = {
+        niveles: nivelesDefault,
+        cols: cols,
+        orden: Array.from({ length: totalCajas }, (_, i) => i + 1),
+        auditadas: auditadas
+    };
+    document.getElementById('planoNiveles').value = nivelesDefault;
+    document.getElementById('planoCols').value = cols;
+    document.getElementById('planoSection').style.display = 'block';
+    renderPlano(document.getElementById('planoGrid'), planoActual, true);
+}
+
+function renderPlano(cont, plano, interactivo) {
+    const niveles = plano.niveles || 1;
+    const total = plano.orden.length;
+    const porNivel = Math.ceil(total / niveles);
+    let html = '';
+    // El nivel superior se dibuja primero (como se ve la paleta de frente)
+    for (let nv = niveles - 1; nv >= 0; nv--) {
+        const inicio = nv * porNivel;
+        const cajas = plano.orden.slice(inicio, inicio + porNivel);
+        if (!cajas.length) continue;
+        const etiqueta = niveles > 1
+            ? `<div class="plano-nivel-titulo"><span class="nivel-tag">${t('plano-nivel')} ${nv + 1}</span>` +
+              `${nv === 0 ? t('plano-base') : (nv === niveles - 1 ? t('plano-superior') : '')}</div>`
+            : '';
+        html += `<div class="plano-nivel">${etiqueta}` +
+            `<div class="plano-grid" style="grid-template-columns:repeat(${plano.cols},1fr)">` +
+            cajas.map((num, i) => {
+                const idx = inicio + i;
+                const qty = plano.auditadas[num];
+                const aud = qty !== undefined;
+                return `<div class="plano-celda ${aud ? 'auditada' : ''}"` +
+                    (interactivo ? ` onclick="tocarCelda(${idx})"` : '') +
+                    ` data-idx="${idx}">` +
+                    `<span>#${num}</span>` +
+                    (aud ? `<span class="plano-qty">(${qty})</span>` : '') +
+                    `</div>`;
+            }).join('') +
+            `</div></div>`;
+    }
+    cont.innerHTML = html;
+}
+
+function tocarCelda(idx) {
+    if (!planoActual) return;
+    const grid = document.getElementById('planoGrid');
+    const celda = grid.querySelector(`[data-idx="${idx}"]`);
+    if (planoSeleccion === null) {
+        planoSeleccion = idx;
+        if (celda) celda.classList.add('plano-sel');
+    } else if (planoSeleccion === idx) {
+        planoSeleccion = null;
+        if (celda) celda.classList.remove('plano-sel');
+    } else {
+        // Intercambiar posiciones (puede ser entre niveles distintos)
+        const o = planoActual.orden;
+        [o[planoSeleccion], o[idx]] = [o[idx], o[planoSeleccion]];
+        planoSeleccion = null;
+        renderPlano(grid, planoActual, true);
+        // Persistir el ajuste en el reporte ya guardado
+        actualizarPlanoEnNube();
+    }
+}
+
+function cambiarColsPlano() {
+    if (!planoActual) return;
+    planoActual.cols = parseInt(document.getElementById('planoCols').value);
+    planoSeleccion = null;
+    renderPlano(document.getElementById('planoGrid'), planoActual, true);
+    actualizarPlanoEnNube();
+}
+
+function cambiarNivelesPlano() {
+    if (!planoActual) return;
+    planoActual.niveles = parseInt(document.getElementById('planoNiveles').value);
+    planoSeleccion = null;
+    renderPlano(document.getElementById('planoGrid'), planoActual, true);
+    actualizarPlanoEnNube();
+}
+
+let folioActual = null;
+function actualizarPlanoEnNube() {
+    if (!db || !folioActual || !planoActual) return;
+    db.collection('reportes').doc(folioActual)
+        .update({ plano: planoActual })
+        .catch(() => {}); // si las reglas no permiten update para este rol, el plano queda como se generó
 }
 
 // ══════════════════════════════════════════════════════
@@ -1296,6 +1744,7 @@ function ejecutarAuditoria() {
     const aql = parseFloat(document.getElementById('aqlLevel').value);
     const inspector = document.getElementById('inspectorNombre').value.trim();
     const modulo = document.getElementById('moduloArea').value.trim();
+    const codigoProducto = document.getElementById('codigoProducto').value.trim().toUpperCase();
     const observaciones = document.getElementById('observaciones').value.trim();
     const errorDiv = document.getElementById('errorMsg');
     errorDiv.style.display = 'none';
@@ -1303,9 +1752,7 @@ function ejecutarAuditoria() {
     if (!lote || lote < 2) { alert(t('alert-invalid')); return; }
     if (!inspector) { alert(t('alert-inspector')); return; }
     if (!modulo) { alert(t('alert-modulo')); return; }
-    // Recordar inspector y módulo para la próxima auditoría
-    localStorage.setItem('lastInspector', inspector);
-    localStorage.setItem('lastModulo', modulo);
+    if (!codigoProducto) { alert(t('alert-codigo')); return; }
     if (capMaxInput > 0 && totalCajas === 0) totalCajas = Math.ceil(lote / capMaxInput);
 
     let letra = 'A';
@@ -1348,6 +1795,7 @@ function ejecutarAuditoria() {
     document.getElementById('folioReporte').innerText = folio;
     document.getElementById('inspectorReporte').innerText = inspector;
     document.getElementById('moduloReporte').innerText = modulo;
+    document.getElementById('codigoReporte').innerText = codigoProducto;
     document.getElementById('fechaReporte').innerText = fechaLocal.replace('T', ' ');
 
     document.getElementById('loteReporte').innerText = lote.toLocaleString();
@@ -1381,11 +1829,24 @@ function ejecutarAuditoria() {
     }
     actualizarNotaAseguramiento();
 
+    // ── Plano de ubicación de paletas ──
+    folioActual = folio;
+    planoSeleccion = null;
+    if (totalCajas > 0) {
+        const auditadasMap = {};
+        distribucionReporte.forEach(d => { if (d.caja > 0) auditadasMap[d.caja] = d.cantidad; });
+        crearPlano(totalCajas, auditadasMap);
+    } else {
+        planoActual = null;
+        document.getElementById('planoSection').style.display = 'none';
+    }
+
     // ── Guardar reporte en la nube ──
     guardarReporte({
         folio: folio,
         inspector: inspector,
         modulo: modulo,
+        codigoProducto: codigoProducto,
         observaciones: observaciones,
         lote: lote,
         nivel: nivel,
@@ -1396,6 +1857,8 @@ function ejecutarAuditoria() {
         re: re,
         totalCajas: totalCajas,
         distribucion: distribucionReporte,
+        plano: planoActual,
+        fotosCount: fotosCapturadas.length,
         fechaLocal: fechaLocal,
         creadoEn: (db ? firebase.firestore.FieldValue.serverTimestamp() : null),
         dispositivo: navigator.userAgent.substring(0, 120)
@@ -1411,9 +1874,8 @@ function ejecutarAuditoria() {
     document.getElementById('darkToggle').checked = currentTheme === 'dark';
     // Restaurar idioma
     applyTexts();
-    // Restaurar último inspector y módulo usados
-    document.getElementById('inspectorNombre').value = localStorage.getItem('lastInspector') || '';
-    document.getElementById('moduloArea').value = localStorage.getItem('lastModulo') || '';
+    // El nombre del inspector NO se guarda: con ~20 inspectores compartiendo
+    // dispositivos, recordarlo causaría reportes a nombre equivocado
 })();
 </script>
 </body>
